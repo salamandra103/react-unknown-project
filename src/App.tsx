@@ -1,4 +1,4 @@
-import React, { Children, useEffect } from "react";
+import React, { Children, useEffect, createContext } from "react";
 import { BrowserRouter, Route, RouteComponentProps, RouteProps, Switch } from "react-router-dom";
 import { Provider } from "react-redux";
 
@@ -11,7 +11,10 @@ import store from "@/store";
 import routes from "@/routes";
 
 function App() {
+	const Auth = createContext(null)
+
 	const routeComponents = routes.map(({ path, component, requiredAuth, layout, ...rest }, key) => {
+		// let Layout = layout;
 		if (layout) {
 			// React.createElement(...layout, )
 			return (
@@ -31,7 +34,6 @@ function App() {
 				</Switch>
 			</BrowserRouter>
 		</Provider>
-
 	);
 }
 

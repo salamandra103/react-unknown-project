@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import * as Material from '@material-ui/core';
 
-import SignIn from './SignIn';
-import { ProgressPlugin } from 'webpack';
+import SignIn from '@/pages/SignIn';
 import { RouteComponentProps } from 'react-router';
 
 const Main = (props: RouteComponentProps): JSX.Element => {

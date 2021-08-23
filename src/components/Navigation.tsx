@@ -6,12 +6,12 @@ import style from '@/assets/styles/components/Navigation.module.scss'
 const Navigation = () => {
     return (
         <nav className={style.nav}>
-            <ul className={style.ul}>
-                <li className={style.li}>
-                    <NavLink to="/" className={style.a}>Main</NavLink>
+            <ul>
+                <li>
+                    <NavLink to="/">Main</NavLink>
                 </li>
-                <li className={style.li}>
-                    <NavLink to="/signin" className={style.a}>SignIn</NavLink>
+                <li>
+                    <NavLink to="/signin">SignIn</NavLink>
                 </li>
             </ul>
         </nav>

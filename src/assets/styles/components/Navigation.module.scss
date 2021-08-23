@@ -2,30 +2,31 @@
     padding: 0 0;
     background-color: #9839e0;
 
-    .ul {
-        display: flex;
-        margin: 0px;
 
-        .li {
-            transition: .2s;
+    :global {
+        ul {
+            display: flex;
+            margin: 0px;
 
-            &:hover {
-                background-color: #ff7900;
-
-                .a {
-                    transform: translateY(-2px);
-                }
-            }
-
-            .a {
-                display: block;
-                font-size: 16px;
-                font-weight: 300;
-                padding: 15px 30px;
-                color: #fff;
+            li {
                 transition: .2s;
 
-                &:hover {}
+                &:hover {
+                    background-color: #ff7900;
+
+                    a {
+                        transform: translateY(-2px);
+                    }
+                }
+
+                a {
+                    display: block;
+                    font-size: 16px;
+                    font-weight: 300;
+                    padding: 15px 30px;
+                    color: #fff;
+                    transition: .2s;
+                }
             }
         }
     }

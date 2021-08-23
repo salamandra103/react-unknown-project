@@ -21,6 +21,17 @@ input,
 select,
 button {
     outline: none;
+    border: none;
+}
+
+button {
+    &:not(:disabled) {
+        cursor: pointer;
+    }
+}
+
+input {
+    padding: 0 10px;
 }
 
 a {
