@@ -1,0 +1,29 @@
+.widget {
+    padding: 20px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+
+    :global {
+        .header {
+            & + * {
+                padding-top: 10px;
+            }
+            .name {
+                font-size: 16px;
+            }
+        }
+
+        .content {
+            flex: 1 0 auto;
+            padding-bottom: 20px;
+        }
+
+        .footer {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+    }
+}

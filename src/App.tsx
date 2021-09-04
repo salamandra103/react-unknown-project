@@ -1,5 +1,5 @@
-import React, { Children, useEffect, createContext } from "react";
-import { BrowserRouter, Route, RouteComponentProps, RouteProps, Switch } from "react-router-dom";
+import React, { Children, useEffect, createContext, useContext } from "react";
+import { BrowserRouter, Redirect, Route, RouteComponentProps, RouteProps, Switch } from "react-router-dom";
 import { Provider } from "react-redux";
 
 import * as Material from '@material-ui/core';
@@ -10,16 +10,24 @@ import LogoutLayout from '@/layouts/LogoutLayout'
 import store from "@/store";
 import routes from "@/routes";
 
-function App() {
-	const Auth = createContext(null)
+import { AuthContext } from '@/contexts/auth';
 
+function App() {
 	const routeComponents = routes.map(({ path, component, requiredAuth, layout, ...rest }, key) => {
-		// let Layout = layout;
 		if (layout) {
-			// React.createElement(...layout, )
 			return (
 				<Route exact {...rest} path={path} key={key} render={(props) => {
-					return React.createElement(layout, props, React.createElement(component, props))
+					if (requiredAuth) {
+						return (<AuthContext.Consumer>
+							{
+								auth => {
+									return auth ? React.createElement(layout, props, React.createElement(component, props)) : <Redirect to="/signin" />
+								}
+							}
+						</AuthContext.Consumer>)
+					} else {
+						return React.createElement(layout, props, React.createElement(component, props))
+					}
 				}} />
 			)
 		}
@@ -28,11 +36,13 @@ function App() {
 
 	return (
 		<Provider store={store}>
-			<BrowserRouter basename="/">
-				<Switch>
-					{routeComponents}
-				</Switch>
-			</BrowserRouter>
+			<AuthContext.Provider value={false}>
+				<BrowserRouter basename="/">
+					<Switch>
+						{routeComponents}
+					</Switch>
+				</BrowserRouter>
+			</AuthContext.Provider>
 		</Provider>
 	);
 }

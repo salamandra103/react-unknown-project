@@ -1,0 +1,15 @@
+.main {
+    padding: 30px;
+    :global {
+        .grid {
+            display: flex;
+            margin: 0 -15px;
+            flex-flow: row wrap;
+            & > div {
+                margin: 0 15px 30px;
+                flex: 1 0 calc(20% - 30px);
+                max-width: calc(20% - 30px);
+            }
+        }
+    }
+}

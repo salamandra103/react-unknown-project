@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { NavLink, useHistory } from 'react-router-dom';
-import style from '@assets/styles/pages/SignIn.module.scss'
+import style from '@styles/pages/SignIn.module.scss'
 
 
 interface State {

@@ -37,9 +37,10 @@ module.exports = {
 		"react/jsx-indent": ["error", "tab"],
 		"react/jsx-indent-props": ["error", 'tab'],
 		"react/jsx-closing-bracket-location": [1, 'after-props'],
-		"react/jsx-max-props-per-line": ["off"],
-		"react/jsx-first-prop-new-line": ["error", "never"],
-		"react/require-default-props": ["error", { forbidDefaultForRequired: false}]
+		"react/jsx-max-props-per-line": ["error", { "maximum": 1}],
+		// "react/jsx-first-prop-new-line": ["error", "never"],
+		"react/jsx-first-prop-new-line": ["error", "multiline"],
+		"react/require-default-props": ["error", { forbidDefaultForRequired: false}],
 		"import/no-unresolved": ["off"],
 		"import/prefer-default-export": ["off"],
 	}

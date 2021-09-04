@@ -1,0 +1,44 @@
+.error404 {
+    :global {
+        .container {
+            position: relative;
+            min-height: 100vh;
+            background: #fff;
+            background: linear-gradient(50deg, #fff 0%, rgba(#c2c2fa, 1) 150%);
+        }
+
+        .wrapper {
+            position: absolute;
+            height: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            button {
+                // position: absolute;
+                // left: 50%;
+                // bottom: calc(50%);
+                // transform: translate(-50%, -50%);
+                font-size: 24px;
+                background-color: #442f86;
+                padding: 10px 30px;
+                border: none;
+                color: #fff;
+                margin-top: 30px;
+                transition: .2s;
+
+                &:hover {
+                    background-color: #867bba;
+                }
+            }
+
+            img {
+                height: 100%;
+                width: 100%;
+            }
+        }
+    }
+}

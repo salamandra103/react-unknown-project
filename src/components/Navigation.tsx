@@ -1,18 +1,23 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 
-import style from '@/assets/styles/components/Navigation.module.scss'
+import style from '@styles/components/Navigation.module.scss'
+
+import routes from "@/routes";
 
 const Navigation = () => {
+    let isNavRoutes = routes.filter(route => route.options && route.options.isNav);
+
     return (
         <nav className={style.nav}>
             <ul>
-                <li>
-                    <NavLink to="/">Main</NavLink>
-                </li>
-                <li>
-                    <NavLink to="/signin">SignIn</NavLink>
-                </li>
+                {
+                    isNavRoutes.map((route, index) => (
+                        <li key={index}>
+                            <NavLink to={route.path}>{route.title}</NavLink>
+                        </li>
+                    ))
+                }
             </ul>
         </nav>
     )
