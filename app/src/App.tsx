@@ -2,8 +2,6 @@ import React, { Children, useEffect, createContext, useContext } from "react";
 import { BrowserRouter, Redirect, Route, RouteComponentProps, RouteProps, Switch } from "react-router-dom";
 import { Provider } from "react-redux";
 
-import * as Material from '@material-ui/core';
-
 import LoginLayout from '@/layouts/LoginLayout'
 import LogoutLayout from '@/layouts/LogoutLayout'
 

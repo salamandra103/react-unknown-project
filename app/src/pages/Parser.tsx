@@ -32,23 +32,26 @@ const Parser = (props: RouteComponentProps): JSX.Element => {
     const debouncedSearchTerm = useDebounce(state.searchUrl, 1000)
 
     useEffect(() => {
-        if (debouncedSearchTerm.length) {
-            fetch('https://jsonplaceholder.typicode.com/posts/1')
-                .then(async (response) => {
-                    let json = await response.json();
-                    setState({
-                        ...state,
-                        data: {
-                            ...json
-                        }
-                    });
-                })
-        } else {
-            setState({
-                ...state,
-                data: {}
-            });
-        }
+        fetch('http://localhost:3001/api/parser').then(async res => {
+            console.log(await res.json());
+        })
+        // if (debouncedSearchTerm.length) {
+        //     fetch('https://jsonplaceholder.typicode.com/posts/1')
+        //         .then(async (response) => {
+        //             let json = await response.json();
+        //             setState({
+        //                 ...state,
+        //                 data: {
+        //                     ...json
+        //                 }
+        //             });
+        //         })
+        // } else {
+        //     setState({
+        //         ...state,
+        //         data: {}
+        //     });
+        // }
     }, [debouncedSearchTerm])
 
     return (
