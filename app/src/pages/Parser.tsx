@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { RouteComponentProps } from 'react-router'
+import axios from 'axios'
 
 import { useDebounce } from '@/hooks/useDebounce'
 
@@ -8,15 +9,18 @@ import style from '@styles/pages/Parser.module.scss'
 interface State {
     searchUrl: string,
     searchTag: string,
-    data: any
+    data: any,
+    html: Array<any>
 }
 
 const Parser = (props: RouteComponentProps): JSX.Element => {
     const [state, setState] = useState<State>({
         searchUrl: '',
         searchTag: '',
-        data: {}
+        data: {},
+        html: []
     })
+
 
     const handleChangeSearchInput = (e: React.FormEvent<HTMLInputElement>): void => {
         setState({
@@ -32,8 +36,12 @@ const Parser = (props: RouteComponentProps): JSX.Element => {
     const debouncedSearchTerm = useDebounce(state.searchUrl, 1000)
 
     useEffect(() => {
-        fetch('http://localhost:3001/api/parser').then(async res => {
-            console.log(await res.json());
+        axios.get('http://localhost:3001/api/parser').then(({ data }) => {
+            console.log(data);
+            // setState({
+            //     ...state,
+            //     html: data
+            // })
         })
         // if (debouncedSearchTerm.length) {
         //     fetch('https://jsonplaceholder.typicode.com/posts/1')
@@ -89,6 +97,12 @@ const Parser = (props: RouteComponentProps): JSX.Element => {
                                     </React.Fragment>
                                 )
                             }) : null
+                        }
+
+                        {
+                            state.html.map((item) => {
+                                return item.html
+                            })
                         }
                     </div>
                 </div>
