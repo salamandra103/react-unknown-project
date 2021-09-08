@@ -11,23 +11,31 @@ app.set("port", port);
 
 const server = http.createServer(app);
 
-mongoose.set("useCreateIndex", true);
-
-mongoose.connect("mongodb://localhost:27017/unknownappdb", {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
-	useFindAndModify: false,
-	connectTimeoutMS: 1000,
-	socketTimeoutMS: 1000,
-}, (err) => {
-	if (err) {
-		return console.log(err);
-	}
-	server.listen(port, () => {
-		console.log("Server started");
-	});
-
-	server.on("error", (err) => {
-		throw err;
-	});
+server.listen(port, () => {
+	console.log("Server started");
 });
+
+server.on("error", (err) => {
+	throw err;
+});
+
+// mongoose.set("useCreateIndex", true);
+
+// mongoose.connect("mongodb://localhost:27017/unknownappdb", {
+// 	useNewUrlParser: true,
+// 	useUnifiedTopology: true,
+// 	useFindAndModify: false,
+// 	connectTimeoutMS: 1000,
+// 	socketTimeoutMS: 1000,
+// }, (err) => {
+// 	if (err) {
+// 		return console.log(err);
+// 	}
+// 	server.listen(port, () => {
+// 		console.log("Server started");
+// 	});
+
+// 	server.on("error", (err) => {
+// 		throw err;
+// 	});
+// });

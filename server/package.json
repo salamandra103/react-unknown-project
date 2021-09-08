@@ -22,7 +22,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.3",
     "mongoose": "^5.11.8",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "puppeteer": "^10.2.0"
   },
   "devDependencies": {
     "eslint": "^7.19.0",
