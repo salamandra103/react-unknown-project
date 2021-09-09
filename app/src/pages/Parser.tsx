@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { RouteComponentProps } from 'react-router'
 import axios from 'axios'
 
-import { useDebounce } from '@/hooks/useDebounce'
+import { debounce } from '@/utils/debounce'
 import { usePrevious } from '@/hooks/usePrevious'
+import { useFirstMount } from '@/hooks/useFirstMount'
 
 import style from '@styles/pages/Parser.module.scss'
 
@@ -22,10 +23,7 @@ const Parser = (props: RouteComponentProps): JSX.Element => {
         html: []
     })
 
-    const [count, setCount] = useState(0);
-    const [res, setRes] = useState(0);
-
-    const debouncedSearchTerm = useDebounce(state.searchUrl, 1000)
+    const isFirstMount = useFirstMount();
 
     const handleChangeSearchInput = (e: React.FormEvent<HTMLInputElement>): void => {
         setState({
@@ -35,46 +33,25 @@ const Parser = (props: RouteComponentProps): JSX.Element => {
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLButtonElement>): void => {
-        setCount(count + 1)
+        debounceFetchParser()
     }
 
-    const d = () => {
-        return count * count
-    }
+    const debounceFetchParser = useCallback(debounce(() => {
+        axios.get('http://localhost:3001/api/parser').then(({ data }) => {
+            console.log(data);
+        })
+        // setState({
+        //     ...state,
+        //     html: data
+        // })
+    }, 500), [])
 
-    let val1 = useMemo(() => d(), [count])
 
     useEffect(() => {
-        setRes(d)
-    }, [count]);
-
-
-    // useEffect(() => {
-    //     axios.get('http://localhost:3001/api/parser').then(({ data }) => {
-    //         console.log(data);
-    //         // setState({
-    //         //     ...state,
-    //         //     html: data
-    //         // })
-    //     })
-    //     // if (debouncedSearchTerm.length) {
-    //     //     fetch('https://jsonplaceholder.typicode.com/posts/1')
-    //     //         .then(async (response) => {
-    //     //             let json = await response.json();
-    //     //             setState({
-    //     //                 ...state,
-    //     //                 data: {
-    //     //                     ...json
-    //     //                 }
-    //     //             });
-    //     //         })
-    //     // } else {
-    //     //     setState({
-    //     //         ...state,
-    //     //         data: {}
-    //     //     });
-    //     // }
-    // }, [debouncedSearchTerm])
+        if (!isFirstMount) {
+            debounceFetchParser()
+        }
+    }, [state.searchUrl])
 
     return (
         <section className={style.parse}>
