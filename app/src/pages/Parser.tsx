@@ -17,7 +17,7 @@ interface State {
 
 const Parser = (props: RouteComponentProps): JSX.Element => {
     const [state, setState] = useState<State>({
-        searchUrl: '',
+        searchUrl: 'https://coinmarketcap.com/',
         searchTag: '',
         data: {},
         html: []
@@ -33,23 +33,21 @@ const Parser = (props: RouteComponentProps): JSX.Element => {
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLButtonElement>): void => {
-        debounceFetchParser()
+        debounceFetchParser(state.searchUrl)
     }
 
-    const debounceFetchParser = useCallback(debounce(() => {
-        axios.get('http://localhost:3001/api/parser').then(({ data }) => {
-            console.log(data);
-        })
-        // setState({
-        //     ...state,
-        //     html: data
-        // })
+    const debounceFetchParser = useCallback(debounce(async (url) => {
+        const { data } = await axios.get('http://localhost:3001/api/parser', {
+            params: {
+                url: encodeURI(url)
+            }
+        });
     }, 500), [])
 
 
     useEffect(() => {
         if (!isFirstMount) {
-            debounceFetchParser()
+            debounceFetchParser(state.searchUrl)
         }
     }, [state.searchUrl])
 
