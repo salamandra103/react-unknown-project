@@ -1,0 +1,20 @@
+.chat {
+    :global {
+        .messages {
+            &__container {
+            }
+
+            &__list {
+                display: flex;
+                flex-direction: column;
+            }
+
+            &__item {
+                align-self: flex-start;
+                &_right {
+                    align-self: flex-end;
+                }
+            }
+        }
+    }
+}

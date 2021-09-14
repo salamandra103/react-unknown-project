@@ -3,9 +3,10 @@ import { RouteComponentProps } from 'react-router';
 
 import SignIn from '@/pages/SignIn';
 import Widget from '@/components/Widget';
+import Chat from '@/components/Chat';
 
 import style from "@styles/pages/Main.module.scss"
-import { stat } from 'fs';
+
 
 const Main = (props: RouteComponentProps): JSX.Element => {
     const [state, setState] = useState({
@@ -42,6 +43,8 @@ const Main = (props: RouteComponentProps): JSX.Element => {
                     })
                 }
             </div>
+
+            <Chat />
         </main>
     )
 }

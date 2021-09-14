@@ -25,7 +25,7 @@ const Parser = (props: RouteComponentProps): JSX.Element => {
 
     const isFirstMount = useFirstMount();
 
-    const handleChangeSearchInput = (e: React.FormEvent<HTMLInputElement>): void => {
+    const handleChange = (e: React.FormEvent<HTMLInputElement>): void => {
         setState({
             ...state,
             [e.currentTarget.name]: e.currentTarget.value.trim()
@@ -60,7 +60,7 @@ const Parser = (props: RouteComponentProps): JSX.Element => {
                             type="text"
                             name="searchUrl"
                             defaultValue={state.searchUrl}
-                            onChange={handleChangeSearchInput}
+                            onChange={handleChange}
                             placeholder="Введите URL сайта для парсинга"
                         />
                     </div>
@@ -69,7 +69,7 @@ const Parser = (props: RouteComponentProps): JSX.Element => {
                             type="text"
                             name="searchTag"
                             defaultValue={state.searchTag}
-                            onChange={handleChangeSearchInput}
+                            onChange={handleChange}
                             placeholder="Введите селектор который нужно спарсить"
                         />
                     </div>

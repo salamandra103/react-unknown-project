@@ -1,6 +1,7 @@
 const http = require("http");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const { Server } = require("socket.io");
 
 dotenv.config();
 
@@ -11,6 +12,14 @@ app.set("port", port);
 
 const server = http.createServer(app);
 
+// Покдлючение socket
+const io = new Server(server, {
+	cors: "*",
+});
+io.on("connection", (socket) => {
+	console.log("User connected");
+});
+
 server.listen(port, () => {
 	console.log("Server started");
 });
@@ -19,6 +28,7 @@ server.on("error", (err) => {
 	throw err;
 });
 
+// Подключение БД
 // mongoose.set("useCreateIndex", true);
 
 // mongoose.connect("mongodb://localhost:27017/unknownappdb", {
