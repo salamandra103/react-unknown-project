@@ -17,7 +17,10 @@ const io = new Server(server, {
 	cors: "*",
 });
 io.on("connection", (socket) => {
-	console.log("User connected");
+	console.log(socket.handshake.query);
+	socket.on("connectRoom", ((roomName) => {
+		socket.join(roomName);
+	}));
 });
 
 server.listen(port, () => {

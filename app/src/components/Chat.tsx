@@ -51,8 +51,22 @@ const Chat = () => {
         console.log(e);
     }
 
+    const connectRoom = () => {
+        if (socketRef.current) {
+            socketRef.current.emit('connectRoom', { user: state.currentUser, roomname: '1dsadas' })
+        }
+    }
+
     useEffect(() => {
-        socketRef.current = io("http://localhost:3001");
+        socketRef.current = io("http://localhost:3001", {
+            query: {
+                dsa: 'dsad'
+            }
+        });
+
+        socketRef.current.on('getMessage', (message) => {
+            console.log(message);
+        })
     }, [])
 
     return (
@@ -76,6 +90,7 @@ const Chat = () => {
                 <textarea name="chatform" cols={30} rows={10} placeholder="Введите текст" onChange={handleChange}></textarea>
                 <button type="submit"></button>
             </form>
+            <button type="button" onClick={connectRoom}>Подключится в комнату</button>
         </div>
     )
 }
