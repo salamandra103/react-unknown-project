@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 dotenv.config();
 
 const app = require("./app");
+const socketHandlers = require("./controllers/socket");
 
 const port = process.env.PORT;
 app.set("port", port);
@@ -16,12 +17,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
 	cors: "*",
 });
-io.on("connection", (socket) => {
-	console.log(socket.handshake.query);
-	socket.on("connectRoom", ((roomName) => {
-		socket.join(roomName);
-	}));
-});
+io.on("connection", socketHandlers.onConnection);
 
 server.listen(port, () => {
 	console.log("Server started");
