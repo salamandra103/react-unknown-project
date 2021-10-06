@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 dotenv.config();
 
 const app = require("./app");
-const socketHandlers = require("./controllers/socket");
+const chatControllet = require("./controllers/chat");
 
 const port = process.env.PORT;
 app.set("port", port);
@@ -17,34 +17,26 @@ const server = http.createServer(app);
 const io = new Server(server, {
 	cors: "*",
 });
-io.on("connection", socketHandlers.onConnection);
-
-server.listen(port, () => {
-	console.log("Server started");
-});
-
-server.on("error", (err) => {
-	throw err;
-});
+io.on("connection", chatControllet);
 
 // Подключение БД
-// mongoose.set("useCreateIndex", true);
+mongoose.set("useCreateIndex", true);
 
-// mongoose.connect("mongodb://localhost:27017/unknownappdb", {
-// 	useNewUrlParser: true,
-// 	useUnifiedTopology: true,
-// 	useFindAndModify: false,
-// 	connectTimeoutMS: 1000,
-// 	socketTimeoutMS: 1000,
-// }, (err) => {
-// 	if (err) {
-// 		return console.log(err);
-// 	}
-// 	server.listen(port, () => {
-// 		console.log("Server started");
-// 	});
+mongoose.connect("mongodb://localhost:27017/unknownappdb", {
+	useNewUrlParser: true,
+	useUnifiedTopology: true,
+	useFindAndModify: false,
+	connectTimeoutMS: 1000,
+	socketTimeoutMS: 1000,
+}, (err) => {
+	if (err) {
+		return console.log(err);
+	}
+	server.listen(port, () => {
+		console.log("Server started");
+	});
 
-// 	server.on("error", (err) => {
-// 		throw err;
-// 	});
-// });
+	server.on("error", (err) => {
+		throw err;
+	});
+});

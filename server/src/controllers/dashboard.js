@@ -1,5 +1,3 @@
-const createError = require("http-errors");
-
 const Dashboard = require("../models/dashboard");
 
 exports.dashboardGet = (req, res, next) => {
