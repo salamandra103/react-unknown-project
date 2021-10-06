@@ -6,7 +6,6 @@ const rooms = new Schema([
 	{
 		name: String,
 		author: String,
-		id: Number,
 		messages: [
 			{
 				value: String,

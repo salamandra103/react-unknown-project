@@ -17,7 +17,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
 	cors: "*",
 });
-io.on("connection", chatControllet);
+io.on("connection", chatControllet.connect);
 
 // Подключение БД
 mongoose.set("useCreateIndex", true);

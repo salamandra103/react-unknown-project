@@ -93,11 +93,17 @@
             width: 100%;
             padding: 10px;
             background-color: #fff;
+
             h4 {
                 margin-bottom: 20px;
             }
+
             ul {
                 li {
+                    margin-bottom: 5px;
+                    max-height: 26px;
+                    position: relative;
+
                     input[type="radio"] {
                         display: none;
                         &:checked {
@@ -107,17 +113,120 @@
                             }
                         }
                     }
-                    span {
+
+                    span:not(.delete) {
                         display: block;
                         width: 100%;
                         padding: 5px;
-                        margin-bottom: 5px;
-                        border-radius: 5px;
-                        background-color: #eee;
                         transition: .2s;
+                        background-color: #eee;
+                        border-radius: 5px;
+                        cursor: pointer;
+                    }
+
+                    span.delete {
+                        position: absolute;
+                        right: 10px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        font-weight: 700;
+                        color: #000;
+                        background-color: transparent!important;
+                        cursor: pointer;
+                        transition: .2s;
+                        
+                        &.white {
+                            color: #fff;
+                        }
+
+                        &:hover {
+                            transform: translateY(-50%) scale(1.5);
+                        }
+                    }
+
+                    &:hover {
+                        span {
+                            background-color: #9839e0;
+                            color: #fff;
+                        }
                     }
                    
+                    &.plus {
+                        cursor: pointer;
+                        width: 100%;
+                        transition: .2s;
+                        background-color: #eee;
+                        border-radius: 5px;
+                        text-align: center;
+
+                        &:before {
+                            content: '';
+                            display: inline-block;
+                            width: 24px;
+                            height: 24px;
+                            background-image:
+                                linear-gradient(#000,#000),
+                                linear-gradient(#000,#000);
+                            background-position: center;
+                            background-size: 50% 2px,2px 50%;
+                            background-repeat:no-repeat; 
+                        }
+
+                        &:hover {
+                            background-color: #9839e0;
+                            &:before {
+                                background-image:
+                                linear-gradient(#fff,#fff),
+                                linear-gradient(#fff,#fff);
+                            }
+                        }
+                        &.minus {
+                            &:before {
+                                content: '';
+                                display: inline-block;
+                                width: 24px;
+                                height: 24px;
+                                background-image:
+                                    linear-gradient(#000,#000);
+                                background-position: center;
+                                background-size: 50% 2px;
+                                background-repeat:no-repeat; 
+                            }
+                            &:hover {
+                                background-color: #9839e0;
+                                &:before {
+                                    background-image:
+                                    linear-gradient(#fff,#fff),
+                                }
+                            }
+                        }
+                    }
                 }
+            }
+        }
+
+        .create {
+            padding: 10px;
+            background-color: #fff;
+
+            h4 {
+                margin-bottom: 20px;
+            }
+
+            input {
+                width: 100%;
+                border: none;
+                background-color: #eee;
+                padding: 10px;
+                border-radius: 5px;
+                outline: none;
+                height: 25px;
+                margin-bottom: 5px;
+            }
+            
+            button {
+                height: 25px;
+                border-radius: 5px;
             }
         }
     }

@@ -1,27 +1,32 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo, FormEvent } from 'react'
 import io, { Socket } from 'socket.io-client'
 
+import api from "@/utils/api"
+
 import style from '@styles/components/Chat.module.scss'
+import { AxiosResponse } from 'axios'
 
 interface State {
     currentUser: string,
     chatform: string,
     counter: number,
-    messages: Array<Message>,
-    rooms: Array<Room>
+    rooms: Array<Room>,
+    isCreateForm: boolean,
+    createRoomName: string,
+    messages: Array<Message>
 }
 
 interface Room {
-    id: number,
+    id: string,
     name?: string,
     active: boolean,
-    users: string[]
+    messages: Array<Message>,
 }
 
 interface Message {
-    text: string,
-    author: string,
-    id: number
+    value: string,
+    author?: string,
+    id: string
 }
 
 const Chat = () => {
@@ -30,42 +35,10 @@ const Chat = () => {
         currentUser: 'user_1',
         chatform: '',
         counter: 0,
-        messages: [
-            {
-                text: 'Lorem ipsum dolor sit amet.',
-                author: 'user_1',
-                id: 1,
-            },
-            {
-                text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem aut placeat voluptas!',
-                author: 'user_1',
-                id: 2,
-            },
-            {
-                text: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis, dolore repudiandae recusandae quas veniam quam maxime dolores rem iusto adipisci saepe?',
-                author: 'user_2',
-                id: 3,
-            },
-            {
-                text: 'Lorem ipsum, dolor sit amet consectetur adipisicing.',
-                author: 'user_1',
-                id: 4,
-            }
-        ],
-        rooms: [
-            {
-                id: 1,
-                name: 'Комната 12312',
-                active: false,
-                users: ['Ivan', 'Petya']
-            },
-            {
-                id: 2,
-                name: 'Комната Adsadsac',
-                active: false,
-                users: ['Oskar', 'John']
-            }
-        ]
+        isCreateForm: false,
+        createRoomName: '',
+        rooms: [],
+        messages: [],
     });
 
     const handleChange = (e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -79,16 +52,62 @@ const Chat = () => {
         console.log(e);
     }
 
+    const createRoom = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            await api.post('chat/room', {
+                name: state.createRoomName
+            });
+            setState((state) => ({
+                ...state,
+                isCreateForm: !state.isCreateForm,
+                createRoomName: '',
+            }));
+            await fetchRooms();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const removeRoom = async (id: string) => {
+        try {
+            await api.delete('chat/room', { data: { id } })
+            fetchRooms();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const fetchRooms = async () => {
+        try {
+            let { data: rooms }: AxiosResponse<any[]> = await api.get('chat/room');
+            rooms = rooms.map(({ _id, name, messages }) => {
+                return {
+                    id: _id,
+                    name,
+                    messages,
+                    active: false,
+                }
+            })
+            setState(state => ({
+                ...state,
+                rooms
+            }));
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     const connectRoom = async (e: React.FormEvent<HTMLInputElement>): Promise<any> => {
         let selectedRoom: {
-            id?: number,
+            id?: string,
             name?: string
         } = {};
 
-        await setState({
+        setState({
             ...state,
             rooms: state.rooms.map(room => {
-                if (room.id === parseInt(e.currentTarget.value)) {
+                if (room.id === e.currentTarget.value) {
                     selectedRoom = { ...room }
                     return {
                         ...room,
@@ -99,10 +118,13 @@ const Chat = () => {
             })
         });
 
-
         if (socketRef.current) {
             socketRef.current.emit('connectRoom', selectedRoom.id, selectedRoom.name)
         }
+    }
+
+    const socketSubscribe = () => {
+
     }
 
     useEffect(() => {
@@ -112,9 +134,18 @@ const Chat = () => {
             }
         });
 
-        socketRef.current.on('getRoom', room => {
-            console.log(room);
-        })
+
+        if (socketRef.current) {
+            socketRef.current.on('getRoom', room => {
+                console.log(room);
+                debugger;
+                setState({
+                    ...state,
+                    messages: room.messages
+                })
+            })
+        }
+        fetchRooms();
     }, []);
 
     return (
@@ -128,7 +159,7 @@ const Chat = () => {
                                     return (
                                         <div key={item.id} className={`messages__item ${item.author === state.currentUser ? 'messages__item_right' : ''}`}>
                                             <span className="messages__author">{item.author}</span>
-                                            <span>{item.text}</span>
+                                            <span>{item.value}</span>
                                         </div>
                                     )
                                 })}
@@ -152,11 +183,25 @@ const Chat = () => {
                                         <input type="radio" onChange={connectRoom} checked={room.active} name="rooms" value={room.id} />
                                         <span>{room.name}</span>
                                     </label>
+                                    <span className={room.active ? 'delete white' : 'delete'} onClick={() => removeRoom(room.id)}>X</span>
                                 </li>
                             ))
                         }
+                        <li className={!state.isCreateForm ? "plus" : 'plus minus'} onClick={() => setState({ ...state, isCreateForm: !state.isCreateForm })}></li>
                     </ul>
                 </div>
+                {
+                    state.isCreateForm ? (
+                        <div className="create">
+                            <h4>Создание новой комнаты</h4>
+                            <form onSubmit={createRoom}>
+                                <input name="createRoomName" type="text" placeholder="Введите название комнаты" onChange={handleChange} />
+                                <button type="submit">Создать</button>
+                            </form>
+                        </div>
+                    ) : null
+                }
+
             </div>
         </div>
     )
