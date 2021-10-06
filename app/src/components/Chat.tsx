@@ -97,7 +97,6 @@ const Chat = () => {
         })
         if (socketRef.current) {
             socketRef.current.emit('connectRoom', selectedRoom.id, selectedRoom.name);
-            // socketRef.current.emit('getRoom', selectedRoom.id);
         }
     }
 
@@ -108,8 +107,8 @@ const Chat = () => {
             }
         });
 
-        socketRef.current.on('getMessage', (message) => {
-            console.log(message);
+        socketRef.current.on('getRoom', room => {
+            console.log(room);
         })
     }, [])
 
@@ -138,10 +137,10 @@ const Chat = () => {
             <div className="rooms">
                 <ul>
                     {state.rooms.map(room => (
-                        <>
-                            <li onClick={() => connectRoom(room.id)} key={room.id}>{room.name}</li>
+                        <React.Fragment key={room.id}>
+                            <li onClick={() => connectRoom(room.id)}>{room.name}</li>
                             {room.active ? (<hr />) : null}
-                        </>
+                        </React.Fragment>
                     ))}
                 </ul>
             </div>
