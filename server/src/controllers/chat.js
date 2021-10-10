@@ -1,26 +1,46 @@
 const Chat = require("../models/chat");
 
-exports.connect = (socket) => {
-	console.log("User connected");
-
+exports.connect = (io, socket) => {
 	const getRoom = async(roomId) => {
-		const room = await Chat.findById(roomId, (err, data) => data);
-		socket.to(roomId).emit("getRoom", room);
+		console.log("connected room");
+		const currentRoom = await Chat.findById(roomId, (err, data) => data);
+		const rooms = socket.rooms.values();
+		if (socket.rooms.size) {
+			const firstRoom = rooms.next().value;
+			io.to(firstRoom).emit("getRoom", currentRoom);
+		}
 	};
     
-	const addMessage = (io, socket) => {
-		const currentRoom = Chat.findById(socket.roomId, (err, data) => data);
-		console.log(currentRoom);
+	const addMessage = async(roomId, newMessage) => {
+		const targetRoom = await Chat.findById(roomId);
+		targetRoom.messages.push({
+			value: newMessage,
+		});
+		const { messages } = await targetRoom.save();
+		io.to(roomId).emit("getMessage", messages);
+		
+		// Chat.findByIdAndUpdate(roomId, {
+		// 	messages: [
+		// 		...data.messages,
+		// 		{
+		// 			value: newMessage,
+		// 		},
+		// 	],
+		// }, { new: true }, (err, _data) => {
+		// 	console.log(_data);
+		// });
 	};
 
-	socket.on("connectRoom", ((roomId, roomName) => {
-		// const data = socket.handshake.query;
+	socket.on("connectRoom", ((roomId) => {
 		socket.join(roomId);
-		console.log(socket.rooms);
 		getRoom(roomId);
 	}));
 
-	socket.on("getRoom", getRoom);
+	socket.on("disconnectRoom", (roomId) => {
+		socket.leave(roomId);
+	});
+
+	socket.on("addMessage", addMessage);
 };
 
 exports.createRoom = (req, res, next) => {

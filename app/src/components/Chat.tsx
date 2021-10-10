@@ -9,11 +9,10 @@ import { AxiosResponse } from 'axios'
 interface State {
     currentUser: string,
     chatform: string,
-    counter: number,
     rooms: Array<Room>,
     isCreateForm: boolean,
     createRoomName: string,
-    messages: Array<Message>
+    currentConnectedRoomId: string | null
 }
 
 interface Room {
@@ -26,7 +25,7 @@ interface Room {
 interface Message {
     value: string,
     author?: string,
-    id: string
+    _id: string
 }
 
 const Chat = () => {
@@ -34,11 +33,10 @@ const Chat = () => {
     const [state, setState] = useState<State>({
         currentUser: 'user_1',
         chatform: '',
-        counter: 0,
         isCreateForm: false,
         createRoomName: '',
+        currentConnectedRoomId: null,
         rooms: [],
-        messages: [],
     });
 
     const handleChange = (e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -49,7 +47,14 @@ const Chat = () => {
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        console.log(e);
+        e.preventDefault();
+        if (socketRef.current) {
+            socketRef.current.emit('addMessage', state.currentConnectedRoomId, state.chatform);
+            setState({
+                ...state,
+                chatform: ''
+            });
+        }
     }
 
     const createRoom = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -98,14 +103,15 @@ const Chat = () => {
         }
     }
 
-    const connectRoom = async (e: React.FormEvent<HTMLInputElement>): Promise<any> => {
+    const changeRoom = async (e: React.FormEvent<HTMLInputElement>): Promise<any> => {
         let selectedRoom: {
             id?: string,
-            name?: string
+            name?: string,
+            active?: boolean
         } = {};
-
         setState({
             ...state,
+            currentConnectedRoomId: state.currentConnectedRoomId === e.currentTarget.value ? null : e.currentTarget.value,
             rooms: state.rooms.map(room => {
                 if (room.id === e.currentTarget.value) {
                     selectedRoom = { ...room }
@@ -119,12 +125,12 @@ const Chat = () => {
         });
 
         if (socketRef.current) {
-            socketRef.current.emit('connectRoom', selectedRoom.id, selectedRoom.name)
+            if (!selectedRoom.active) {
+                socketRef.current.emit('connectRoom', selectedRoom.id)
+            } else {
+                socketRef.current.emit('disconnectRoom', selectedRoom.id)
+            }
         }
-    }
-
-    const socketSubscribe = () => {
-
     }
 
     useEffect(() => {
@@ -134,19 +140,39 @@ const Chat = () => {
             }
         });
 
-
-        if (socketRef.current) {
-            socketRef.current.on('getRoom', room => {
-                console.log(room);
-                debugger;
-                setState({
-                    ...state,
-                    messages: room.messages
+        socketRef.current.on('getMessage', (newMessages) => {
+            setState((state) => ({
+                ...state,
+                rooms: state.rooms.map(room => {
+                    if (room.id === state.currentConnectedRoomId) {
+                        return {
+                            ...room,
+                            messages: newMessages
+                        }
+                    }
+                    return room
                 })
-            })
-        }
+            }));
+        });
+
         fetchRooms();
     }, []);
+
+    let currentMessages = () => {
+        if (state.rooms.length) {
+            let currentRoom = state.rooms.find(room => room.id === state.currentConnectedRoomId);
+            return currentRoom && currentRoom.messages.map(item => {
+                return (
+                    <div key={item._id} className={`messages__item ${item.author === state.currentUser ? 'messages__item_right' : ''}`}>
+                        <span className="messages__author">{item.author}</span>
+                        <span>{item.value}</span>
+                    </div>
+                )
+            });
+        } else {
+            return null;
+        }
+    }
 
     return (
         <div className={style.chat}>
@@ -155,19 +181,12 @@ const Chat = () => {
                     <div className="messages">
                         <div className="messages__container">
                             <div className="messages__list">
-                                {state.messages.map(item => {
-                                    return (
-                                        <div key={item.id} className={`messages__item ${item.author === state.currentUser ? 'messages__item_right' : ''}`}>
-                                            <span className="messages__author">{item.author}</span>
-                                            <span>{item.value}</span>
-                                        </div>
-                                    )
-                                })}
+                                {currentMessages()}
                             </div>
                         </div>
                     </div>
                     <form onSubmit={handleSubmit}>
-                        <textarea name="chatform" cols={30} rows={10} placeholder="Введите текст" onChange={handleChange}></textarea>
+                        <textarea name="chatform" value={state.chatform} cols={30} rows={10} placeholder="Введите текст" onChange={handleChange}></textarea>
                         <div className="buttons">
                             <button type="submit">Отправить</button>
                         </div>
@@ -180,7 +199,7 @@ const Chat = () => {
                             state.rooms.map(room => (
                                 <li key={room.id}>
                                     <label>
-                                        <input type="radio" onChange={connectRoom} checked={room.active} name="rooms" value={room.id} />
+                                        <input type="checkbox" onChange={changeRoom} checked={room.active} name="rooms" value={room.id} />
                                         <span>{room.name}</span>
                                     </label>
                                     <span className={room.active ? 'delete white' : 'delete'} onClick={() => removeRoom(room.id)}>X</span>

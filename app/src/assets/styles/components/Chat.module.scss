@@ -104,7 +104,7 @@
                     max-height: 26px;
                     position: relative;
 
-                    input[type="radio"] {
+                    input[type="radio"], input[type="checkbox"] {
                         display: none;
                         &:checked {
                             & + span {
