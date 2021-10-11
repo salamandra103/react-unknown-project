@@ -17,18 +17,7 @@ exports.connect = (io, socket) => {
 			value: newMessage,
 		});
 		const { messages } = await targetRoom.save();
-		io.to(roomId).emit("getMessage", messages);
-		
-		// Chat.findByIdAndUpdate(roomId, {
-		// 	messages: [
-		// 		...data.messages,
-		// 		{
-		// 			value: newMessage,
-		// 		},
-		// 	],
-		// }, { new: true }, (err, _data) => {
-		// 	console.log(_data);
-		// });
+		io.to(roomId).emit("getMessage", messages[messages.length - 1]);
 	};
 
 	socket.on("connectRoom", ((roomId) => {
@@ -68,10 +57,16 @@ exports.deleteRoom = (req, res, next) => {
 
 exports.getRooms = (req, res, next) => {
 	Chat.find({}, (err, data) => {
+		const result = data.map((room) => ({
+			name: room.name,
+			_id: room._id,
+			messages: room.messages.splice(-10),
+		}));
+		
 		if (err) {
 			res.status(404).send(err);
 		} else {
-			res.status(201).json(data);
+			res.status(201).json(result);
 		}
 	});
 };

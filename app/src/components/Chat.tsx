@@ -145,9 +145,11 @@ const Chat = () => {
                 ...state,
                 rooms: state.rooms.map(room => {
                     if (room.id === state.currentConnectedRoomId) {
+                        let messages = room.messages;
+                        messages.push(newMessages);
                         return {
                             ...room,
-                            messages: newMessages
+                            messages
                         }
                     }
                     return room
