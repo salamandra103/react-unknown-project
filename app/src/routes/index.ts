@@ -1,7 +1,6 @@
 import React from 'react';
 import Main from '@/pages/Main'
 import SignIn from '@/pages/SignIn'
-import Parser from '@/pages/Parser'
 import Error404 from '@/pages/Error404'
 
 import LoginLayout from '@/layouts/LoginLayout'
@@ -26,16 +25,6 @@ const routes: {
             path: '/',
             title: 'Main',
             component: Main,
-            requiredAuth: false,
-            layout: LoginLayout,
-            options: {
-                isNav: true
-            }
-        },
-        {
-            path: '/parser',
-            title: 'Parser',
-            component: Parser,
             requiredAuth: false,
             layout: LoginLayout,
             options: {

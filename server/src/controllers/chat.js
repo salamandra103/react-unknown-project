@@ -1,13 +1,23 @@
 const Chat = require("../models/chat");
 
 exports.connect = (io, socket) => {
-	const getRoom = async(roomId) => {
-		console.log("connected room");
+	const getMessages = async(roomId, oldMessageId) => {
 		const currentRoom = await Chat.findById(roomId, (err, data) => data);
+		const currentRoomMessages = [...currentRoom.messages];
+
 		const rooms = socket.rooms.values();
 		if (socket.rooms.size) {
 			const firstRoom = rooms.next().value;
-			io.to(firstRoom).emit("getRoom", currentRoom);
+
+			if (oldMessageId) {
+				const oldMessageIndex = currentRoomMessages.reverse().findIndex((message) => message._id.toString() === oldMessageId);
+				if (oldMessageIndex) {
+					const newMessage = currentRoomMessages.reverse().slice(oldMessageIndex, oldMessageIndex + 10);
+					io.to(firstRoom).emit("getMessages", newMessage.reverse(), true);
+				}
+			} else {
+				io.to(firstRoom).emit("getMessages", currentRoomMessages.slice(-10));
+			}
 		}
 	};
     
@@ -17,19 +27,22 @@ exports.connect = (io, socket) => {
 			value: newMessage,
 		});
 		const { messages } = await targetRoom.save();
-		io.to(roomId).emit("getMessage", messages[messages.length - 1]);
+		io.to(roomId).emit("getMessages", messages.slice(-1));
 	};
 
-	socket.on("connectRoom", ((roomId) => {
+	const connectRoom = (roomId) => {
 		socket.join(roomId);
-		getRoom(roomId);
-	}));
+		getMessages(roomId);
+	};
 
-	socket.on("disconnectRoom", (roomId) => {
+	const disconnectRoom = (roomId) => {
 		socket.leave(roomId);
-	});
+	};
 
+	socket.on("connectRoom", connectRoom);
+	socket.on("disconnectRoom", disconnectRoom);
 	socket.on("addMessage", addMessage);
+	socket.on("getMessages", getMessages);
 };
 
 exports.createRoom = (req, res, next) => {
@@ -60,9 +73,9 @@ exports.getRooms = (req, res, next) => {
 		const result = data.map((room) => ({
 			name: room.name,
 			_id: room._id,
-			messages: room.messages.splice(-10),
+			// messages: room.messages.splice(-10),
+			messages: [],
 		}));
-		
 		if (err) {
 			res.status(404).send(err);
 		} else {

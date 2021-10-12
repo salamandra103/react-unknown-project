@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo, FormEvent } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo, FormEvent, UIEvent } from 'react'
 import io, { Socket } from 'socket.io-client'
 
 import api from "@/utils/api"
@@ -16,7 +16,7 @@ interface State {
 }
 
 interface Room {
-    id: string,
+    _id: string,
     name?: string,
     active: boolean,
     messages: Array<Message>,
@@ -30,6 +30,8 @@ interface Message {
 
 const Chat = () => {
     const socketRef = useRef<Socket | null>(null);
+    const messagesRef = useRef<HTMLDivElement | null>(null);
+
     const [state, setState] = useState<State>({
         currentUser: 'user_1',
         chatform: '',
@@ -83,20 +85,21 @@ const Chat = () => {
         }
     }
 
+    const fetchMessages = async (roomId: string, oldMessageId: string) => {
+
+    }
+
     const fetchRooms = async () => {
         try {
             let { data: rooms }: AxiosResponse<any[]> = await api.get('chat/room');
-            rooms = rooms.map(({ _id, name, messages }) => {
-                return {
-                    id: _id,
-                    name,
-                    messages,
-                    active: false,
-                }
-            })
             setState(state => ({
                 ...state,
-                rooms
+                rooms: rooms.map((room) => {
+                    return {
+                        ...room,
+                        active: false,
+                    }
+                })
             }));
         } catch (error) {
             console.error(error);
@@ -105,15 +108,16 @@ const Chat = () => {
 
     const changeRoom = async (e: React.FormEvent<HTMLInputElement>): Promise<any> => {
         let selectedRoom: {
-            id?: string,
+            _id?: string,
             name?: string,
             active?: boolean
         } = {};
+        let currentTarget = e.currentTarget;
         setState({
             ...state,
-            currentConnectedRoomId: state.currentConnectedRoomId === e.currentTarget.value ? null : e.currentTarget.value,
+            currentConnectedRoomId: state.currentConnectedRoomId === currentTarget.value ? null : currentTarget.value,
             rooms: state.rooms.map(room => {
-                if (room.id === e.currentTarget.value) {
+                if (room._id === currentTarget.value) {
                     selectedRoom = { ...room }
                     return {
                         ...room,
@@ -123,15 +127,30 @@ const Chat = () => {
                 return { ...room, active: false };
             })
         });
-
         if (socketRef.current) {
             if (!selectedRoom.active) {
-                socketRef.current.emit('connectRoom', selectedRoom.id)
+                socketRef.current.emit('connectRoom', selectedRoom._id);
             } else {
-                socketRef.current.emit('disconnectRoom', selectedRoom.id)
+                socketRef.current.emit('disconnectRoom', selectedRoom._id);
+
             }
         }
     }
+
+    useEffect(() => {
+        let onScroll = (e: any) => {
+            if (e.currentTarget.scrollTop === 0 && socketRef.current) {
+                socketRef.current.emit('getMessages', state.currentConnectedRoomId, state.rooms.find(room => room.active)?.messages[0]._id)
+            }
+        }
+        if (socketRef.current) {
+            messagesRef.current && messagesRef.current.addEventListener('scroll', onScroll)
+        }
+        return () => {
+            messagesRef.current && messagesRef.current.removeEventListener('scroll', onScroll)
+
+        }
+    }, [state.rooms])
 
     useEffect(() => {
         socketRef.current = io("http://localhost:3001", {
@@ -140,13 +159,13 @@ const Chat = () => {
             }
         });
 
-        socketRef.current.on('getMessage', (newMessages) => {
+        socketRef.current.on('addMessage', (newMessage) => {
             setState((state) => ({
                 ...state,
                 rooms: state.rooms.map(room => {
-                    if (room.id === state.currentConnectedRoomId) {
+                    if (room._id === state.currentConnectedRoomId) {
                         let messages = room.messages;
-                        messages.push(newMessages);
+                        messages.push(newMessage);
                         return {
                             ...room,
                             messages
@@ -155,6 +174,34 @@ const Chat = () => {
                     return room
                 })
             }));
+            if (messagesRef.current) {
+                messagesRef.current.scrollTop = messagesRef.current.scrollHeight
+            }
+        });
+
+        socketRef.current.on('getMessages', (messages, isUpdate = false) => {
+            setState(state => ({
+                ...state,
+                rooms: state.rooms.map(room => {
+                    if (room._id === state.currentConnectedRoomId) {
+                        return {
+                            ...room,
+                            messages: [
+                                ...room.messages,
+                                ...messages
+                            ]
+                        }
+                    }
+                    return room;
+                })
+            }))
+            if (messagesRef.current) {
+                if (isUpdate) {
+                    messagesRef.current.scrollTop = messagesRef.current.scrollTop + 50
+                } else {
+                    messagesRef.current.scrollTop = messagesRef.current.scrollHeight
+                }
+            }
         });
 
         fetchRooms();
@@ -162,7 +209,7 @@ const Chat = () => {
 
     let currentMessages = () => {
         if (state.rooms.length) {
-            let currentRoom = state.rooms.find(room => room.id === state.currentConnectedRoomId);
+            let currentRoom = state.rooms.find(room => room._id === state.currentConnectedRoomId);
             return currentRoom && currentRoom.messages.map(item => {
                 return (
                     <div key={item._id} className={`messages__item ${item.author === state.currentUser ? 'messages__item_right' : ''}`}>
@@ -182,7 +229,7 @@ const Chat = () => {
                 <div className="form">
                     <div className="messages">
                         <div className="messages__container">
-                            <div className="messages__list">
+                            <div className="messages__list" ref={messagesRef}>
                                 {currentMessages()}
                             </div>
                         </div>
@@ -199,12 +246,12 @@ const Chat = () => {
                     <ul>
                         {
                             state.rooms.map(room => (
-                                <li key={room.id}>
+                                <li key={room._id}>
                                     <label>
-                                        <input type="checkbox" onChange={changeRoom} checked={room.active} name="rooms" value={room.id} />
+                                        <input type="checkbox" onChange={changeRoom} checked={room.active} name="rooms" value={room._id} />
                                         <span>{room.name}</span>
                                     </label>
-                                    <span className={room.active ? 'delete white' : 'delete'} onClick={() => removeRoom(room.id)}>X</span>
+                                    <span className={room.active ? 'delete white' : 'delete'} onClick={() => removeRoom(room._id)}>X</span>
                                 </li>
                             ))
                         }
