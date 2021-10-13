@@ -9,15 +9,7 @@ exports.connect = (io, socket) => {
 		if (socket.rooms.size) {
 			const firstRoom = rooms.next().value;
 
-			if (oldMessageId) {
-				const oldMessageIndex = currentRoomMessages.reverse().findIndex((message) => message._id.toString() === oldMessageId);
-				if (oldMessageIndex) {
-					const newMessage = currentRoomMessages.reverse().slice(oldMessageIndex, oldMessageIndex + 10);
-					io.to(firstRoom).emit("getMessages", newMessage.reverse(), true);
-				}
-			} else {
-				io.to(firstRoom).emit("getMessages", currentRoomMessages.slice(-10));
-			}
+			io.to(firstRoom).emit("getMessages", currentRoomMessages.slice(-10));
 		}
 	};
     
@@ -27,7 +19,7 @@ exports.connect = (io, socket) => {
 			value: newMessage,
 		});
 		const { messages } = await targetRoom.save();
-		io.to(roomId).emit("getMessages", messages.slice(-1));
+		io.to(roomId).emit("addMessage", ...messages.slice(-1));
 	};
 
 	const connectRoom = (roomId) => {

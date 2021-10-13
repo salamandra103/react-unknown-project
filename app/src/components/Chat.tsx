@@ -137,20 +137,31 @@ const Chat = () => {
         }
     }
 
+    const lastCurrentMessageId = useMemo(() => {
+        let currentRoom = state.rooms.find(room => room._id === state.currentConnectedRoomId);
+        return currentRoom && currentRoom.messages.length ? currentRoom.messages[0]._id : null
+    }, [state.rooms])
+
     useEffect(() => {
         let onScroll = (e: any) => {
             if (e.currentTarget.scrollTop === 0 && socketRef.current) {
-                socketRef.current.emit('getMessages', state.currentConnectedRoomId, state.rooms.find(room => room.active)?.messages[0]._id)
+                socketRef.current.emit('getMessages', state.currentConnectedRoomId, lastCurrentMessageId)
             }
         }
-        if (socketRef.current) {
+        if (socketRef.current && state.currentConnectedRoomId) {
             messagesRef.current && messagesRef.current.addEventListener('scroll', onScroll)
+        } else {
+            messagesRef.current && messagesRef.current.removeEventListener('scroll', onScroll)
         }
+
         return () => {
             messagesRef.current && messagesRef.current.removeEventListener('scroll', onScroll)
 
         }
     }, [state.rooms])
+
+
+
 
     useEffect(() => {
         socketRef.current = io("http://localhost:3001", {
@@ -186,10 +197,10 @@ const Chat = () => {
                     if (room._id === state.currentConnectedRoomId) {
                         return {
                             ...room,
-                            messages: [
-                                ...room.messages,
-                                ...messages
-                            ]
+                            messages: isUpdate ? [
+                                ...messages,
+                                ...room.messages
+                            ] : [...messages]
                         }
                     }
                     return room;
