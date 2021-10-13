@@ -1,7 +1,7 @@
 const Chat = require("../models/chat");
 
 exports.connect = (io, socket) => {
-	const getMessages = async(roomId, oldMessageId) => {
+	const getMessages = async(roomId, oldMessageId, messageCount = 10) => {
 		const currentRoom = await Chat.findById(roomId, (err, data) => data);
 		const currentRoomMessages = [...currentRoom.messages];
 
@@ -9,7 +9,16 @@ exports.connect = (io, socket) => {
 		if (socket.rooms.size) {
 			const firstRoom = rooms.next().value;
 
-			io.to(firstRoom).emit("getMessages", currentRoomMessages.slice(-10));
+			if (oldMessageId) { // Получение старых сообщений
+				const oldMessageIndex = currentRoomMessages.reverse().findIndex((message) => message._id.toString() === oldMessageId);
+
+				if (oldMessageIndex && currentRoomMessages[oldMessageIndex]._id !== currentRoomMessages[currentRoomMessages.length - 1]._id) {
+					const newMessage = currentRoomMessages.slice(oldMessageIndex + 1, oldMessageIndex + messageCount + 1).reverse();
+					io.to(firstRoom).emit("getMessages", newMessage, true);
+				}
+			} else { // Получение первых 10 сообщений
+				io.to(firstRoom).emit("getMessages", currentRoomMessages.slice(-messageCount));
+			}
 		}
 	};
     

@@ -8,7 +8,7 @@ import { AxiosResponse } from 'axios'
 
 interface State {
     currentUser: string,
-    chatform: string,
+    chatText: string,
     rooms: Array<Room>,
     isCreateForm: boolean,
     createRoomName: string,
@@ -34,7 +34,7 @@ const Chat = () => {
 
     const [state, setState] = useState<State>({
         currentUser: 'user_1',
-        chatform: '',
+        chatText: '',
         isCreateForm: false,
         createRoomName: '',
         currentConnectedRoomId: null,
@@ -50,12 +50,14 @@ const Chat = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (socketRef.current) {
-            socketRef.current.emit('addMessage', state.currentConnectedRoomId, state.chatform);
-            setState({
-                ...state,
-                chatform: ''
-            });
+        if (state.currentConnectedRoomId) {
+            if (socketRef.current && state.chatText.length) {
+                socketRef.current.emit('addMessage', state.currentConnectedRoomId, state.chatText);
+                setState({
+                    ...state,
+                    chatText: ''
+                });
+            }
         }
     }
 
@@ -85,8 +87,50 @@ const Chat = () => {
         }
     }
 
-    const fetchMessages = async (roomId: string, oldMessageId: string) => {
+    const getMessage = async (messages: Array<Message>, isUpdate: boolean) => {
+        setState(state => ({
+            ...state,
+            rooms: state.rooms.map(room => {
+                if (room._id === state.currentConnectedRoomId) {
+                    return {
+                        ...room,
+                        messages: isUpdate ? [
+                            ...messages,
+                            ...room.messages
+                        ] : [...messages]
+                    }
+                }
+                return room;
+            })
+        }))
 
+        if (messagesRef.current) {
+            if (isUpdate) {
+                // messagesRef.current.scrollTop = messagesRef.current.scrollTop + 50
+            } else {
+                messagesRef.current.scrollTop = messagesRef.current.scrollHeight
+            }
+        }
+    }
+
+    const addMessage = (newMessage: Message) => {
+        setState((state) => ({
+            ...state,
+            rooms: state.rooms.map(room => {
+                if (room._id === state.currentConnectedRoomId) {
+                    let messages = room.messages;
+                    messages.push(newMessage);
+                    return {
+                        ...room,
+                        messages
+                    }
+                }
+                return room
+            })
+        }));
+        if (messagesRef.current) {
+            messagesRef.current.scrollTop = messagesRef.current.scrollHeight
+        }
     }
 
     const fetchRooms = async () => {
@@ -112,19 +156,27 @@ const Chat = () => {
             name?: string,
             active?: boolean
         } = {};
-        let currentTarget = e.currentTarget;
         setState({
             ...state,
-            currentConnectedRoomId: state.currentConnectedRoomId === currentTarget.value ? null : currentTarget.value,
+            currentConnectedRoomId: state.currentConnectedRoomId === e.currentTarget.value ? null : e.currentTarget.value,
             rooms: state.rooms.map(room => {
-                if (room._id === currentTarget.value) {
+                if (room._id === e.currentTarget.value) {
                     selectedRoom = { ...room }
-                    return {
-                        ...room,
-                        active: !room.active
+                    if (room.active) {
+                        return {
+                            ...room,
+                            active: false,
+                            messages: []
+                        }
+                    } else {
+                        return {
+                            ...room,
+                            active: true,
+                        }
                     }
+
                 }
-                return { ...room, active: false };
+                return { ...room, active: false, messages: [] };
             })
         });
         if (socketRef.current) {
@@ -144,8 +196,8 @@ const Chat = () => {
 
     useEffect(() => {
         let onScroll = (e: any) => {
-            if (e.currentTarget.scrollTop === 0 && socketRef.current) {
-                socketRef.current.emit('getMessages', state.currentConnectedRoomId, lastCurrentMessageId)
+            if (e.currentTarget.scrollTop <= 50 && socketRef.current) {
+                socketRef.current.emit('getMessages', state.currentConnectedRoomId, lastCurrentMessageId, 1)
             }
         }
         if (socketRef.current && state.currentConnectedRoomId) {
@@ -170,50 +222,8 @@ const Chat = () => {
             }
         });
 
-        socketRef.current.on('addMessage', (newMessage) => {
-            setState((state) => ({
-                ...state,
-                rooms: state.rooms.map(room => {
-                    if (room._id === state.currentConnectedRoomId) {
-                        let messages = room.messages;
-                        messages.push(newMessage);
-                        return {
-                            ...room,
-                            messages
-                        }
-                    }
-                    return room
-                })
-            }));
-            if (messagesRef.current) {
-                messagesRef.current.scrollTop = messagesRef.current.scrollHeight
-            }
-        });
-
-        socketRef.current.on('getMessages', (messages, isUpdate = false) => {
-            setState(state => ({
-                ...state,
-                rooms: state.rooms.map(room => {
-                    if (room._id === state.currentConnectedRoomId) {
-                        return {
-                            ...room,
-                            messages: isUpdate ? [
-                                ...messages,
-                                ...room.messages
-                            ] : [...messages]
-                        }
-                    }
-                    return room;
-                })
-            }))
-            if (messagesRef.current) {
-                if (isUpdate) {
-                    messagesRef.current.scrollTop = messagesRef.current.scrollTop + 50
-                } else {
-                    messagesRef.current.scrollTop = messagesRef.current.scrollHeight
-                }
-            }
-        });
+        socketRef.current.on('addMessage', addMessage);
+        socketRef.current.on('getMessages', getMessage);
 
         fetchRooms();
     }, []);
@@ -246,9 +256,9 @@ const Chat = () => {
                         </div>
                     </div>
                     <form onSubmit={handleSubmit}>
-                        <textarea name="chatform" value={state.chatform} cols={30} rows={10} placeholder="Введите текст" onChange={handleChange}></textarea>
+                        <textarea name="chatText" value={state.chatText} cols={30} rows={10} placeholder="Введите текст" onChange={handleChange}></textarea>
                         <div className="buttons">
-                            <button type="submit">Отправить</button>
+                            <button type="submit" disabled={!state.chatText.length}>Отправить</button>
                         </div>
                     </form>
                 </div>
