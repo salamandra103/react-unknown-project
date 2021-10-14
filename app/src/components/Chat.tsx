@@ -5,14 +5,12 @@ import api from "@/utils/api"
 
 import style from '@styles/components/Chat.module.scss'
 import { AxiosResponse } from 'axios'
+import useChat from '@/hooks/useChat'
 
 interface State {
-    currentUser: string,
     chatText: string,
-    rooms: Array<Room>,
     isCreateForm: boolean,
     createRoomName: string,
-    currentConnectedRoomId: string | null
 }
 
 interface Room {
@@ -32,13 +30,12 @@ const Chat = () => {
     const socketRef = useRef<Socket | null>(null);
     const messagesRef = useRef<HTMLDivElement | null>(null);
 
+    const { socket, rooms, changeRoom, currentConnectedRoomId, fetchRooms } = useChat(messagesRef);
+
     const [state, setState] = useState<State>({
-        currentUser: 'user_1',
         chatText: '',
         isCreateForm: false,
         createRoomName: '',
-        currentConnectedRoomId: null,
-        rooms: [],
     });
 
     const handleChange = (e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -50,9 +47,9 @@ const Chat = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (state.currentConnectedRoomId) {
-            if (socketRef.current && state.chatText.length) {
-                socketRef.current.emit('addMessage', state.currentConnectedRoomId, state.chatText);
+        if (currentConnectedRoomId) {
+            if (socket && state.chatText.length) {
+                socket.emit('addMessage', currentConnectedRoomId, state.chatText);
                 setState({
                     ...state,
                     chatText: ''
@@ -87,153 +84,29 @@ const Chat = () => {
         }
     }
 
-    const getMessage = async (messages: Array<Message>, isUpdate: boolean) => {
-        setState(state => ({
-            ...state,
-            rooms: state.rooms.map(room => {
-                if (room._id === state.currentConnectedRoomId) {
-                    return {
-                        ...room,
-                        messages: isUpdate ? [
-                            ...messages,
-                            ...room.messages
-                        ] : [...messages]
-                    }
-                }
-                return room;
-            })
-        }))
+    // let currentMessages () => {
+    //     if (rooms.length) {
+    //         debugger
+    //         let currentRoom = rooms.find(room => room._id === currentConnectedRoomId);
+    //         return currentRoom && currentRoom.messages.map(item => {
+    //             return (
+    //                 <div key={item._id} className={`messages__item`}>
+    //                     <span className="messages__author">{item.author}</span>
+    //                     <span>{item.value}</span>
+    //                 </div>
+    //             )
+    //         });
+    //     } else {
+    //         return null;
+    //     }
+    // }
 
-        if (messagesRef.current) {
-            if (isUpdate) {
-                // messagesRef.current.scrollTop = messagesRef.current.scrollTop + 50
-            } else {
-                messagesRef.current.scrollTop = messagesRef.current.scrollHeight
-            }
-        }
-    }
-
-    const addMessage = (newMessage: Message) => {
-        setState((state) => ({
-            ...state,
-            rooms: state.rooms.map(room => {
-                if (room._id === state.currentConnectedRoomId) {
-                    let messages = room.messages;
-                    messages.push(newMessage);
-                    return {
-                        ...room,
-                        messages
-                    }
-                }
-                return room
-            })
-        }));
-        if (messagesRef.current) {
-            messagesRef.current.scrollTop = messagesRef.current.scrollHeight
-        }
-    }
-
-    const fetchRooms = async () => {
-        try {
-            let { data: rooms }: AxiosResponse<any[]> = await api.get('chat/room');
-            setState(state => ({
-                ...state,
-                rooms: rooms.map((room) => {
-                    return {
-                        ...room,
-                        active: false,
-                    }
-                })
-            }));
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    const changeRoom = async (e: React.FormEvent<HTMLInputElement>): Promise<any> => {
-        let selectedRoom: {
-            _id?: string,
-            name?: string,
-            active?: boolean
-        } = {};
-        setState({
-            ...state,
-            currentConnectedRoomId: state.currentConnectedRoomId === e.currentTarget.value ? null : e.currentTarget.value,
-            rooms: state.rooms.map(room => {
-                if (room._id === e.currentTarget.value) {
-                    selectedRoom = { ...room }
-                    if (room.active) {
-                        return {
-                            ...room,
-                            active: false,
-                            messages: []
-                        }
-                    } else {
-                        return {
-                            ...room,
-                            active: true,
-                        }
-                    }
-
-                }
-                return { ...room, active: false, messages: [] };
-            })
-        });
-        if (socketRef.current) {
-            if (!selectedRoom.active) {
-                socketRef.current.emit('connectRoom', selectedRoom._id);
-            } else {
-                socketRef.current.emit('disconnectRoom', selectedRoom._id);
-
-            }
-        }
-    }
-
-    const lastCurrentMessageId = useMemo(() => {
-        let currentRoom = state.rooms.find(room => room._id === state.currentConnectedRoomId);
-        return currentRoom && currentRoom.messages.length ? currentRoom.messages[0]._id : null
-    }, [state.rooms])
-
-    useEffect(() => {
-        let onScroll = (e: any) => {
-            if (e.currentTarget.scrollTop <= 50 && socketRef.current) {
-                socketRef.current.emit('getMessages', state.currentConnectedRoomId, lastCurrentMessageId, 1)
-            }
-        }
-        if (socketRef.current && state.currentConnectedRoomId) {
-            messagesRef.current && messagesRef.current.addEventListener('scroll', onScroll)
-        } else {
-            messagesRef.current && messagesRef.current.removeEventListener('scroll', onScroll)
-        }
-
-        return () => {
-            messagesRef.current && messagesRef.current.removeEventListener('scroll', onScroll)
-
-        }
-    }, [state.rooms])
-
-
-
-
-    useEffect(() => {
-        socketRef.current = io("http://localhost:3001", {
-            query: {
-                testValue: 'Test'
-            }
-        });
-
-        socketRef.current.on('addMessage', addMessage);
-        socketRef.current.on('getMessages', getMessage);
-
-        fetchRooms();
-    }, []);
-
-    let currentMessages = () => {
-        if (state.rooms.length) {
-            let currentRoom = state.rooms.find(room => room._id === state.currentConnectedRoomId);
+    let currentMessages = useMemo(() => {
+        if (rooms.length) {
+            let currentRoom = rooms.find(room => room._id === currentConnectedRoomId);
             return currentRoom && currentRoom.messages.map(item => {
                 return (
-                    <div key={item._id} className={`messages__item ${item.author === state.currentUser ? 'messages__item_right' : ''}`}>
+                    <div key={item._id} className={`messages__item`}>
                         <span className="messages__author">{item.author}</span>
                         <span>{item.value}</span>
                     </div>
@@ -242,7 +115,7 @@ const Chat = () => {
         } else {
             return null;
         }
-    }
+    }, [rooms])
 
     return (
         <div className={style.chat}>
@@ -251,7 +124,7 @@ const Chat = () => {
                     <div className="messages">
                         <div className="messages__container">
                             <div className="messages__list" ref={messagesRef}>
-                                {currentMessages()}
+                                {currentMessages}
                             </div>
                         </div>
                     </div>
@@ -266,7 +139,7 @@ const Chat = () => {
                     <h4>Комнаты</h4>
                     <ul>
                         {
-                            state.rooms.map(room => (
+                            rooms.map(room => (
                                 <li key={room._id}>
                                     <label>
                                         <input type="checkbox" onChange={changeRoom} checked={room.active} name="rooms" value={room._id} />
