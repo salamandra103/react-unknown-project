@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import io, { Socket } from 'socket.io-client'
 import { AxiosResponse } from 'axios'
 
@@ -6,7 +6,6 @@ import api from "@/utils/api"
 
 interface State {
     rooms: Array<Room>,
-    createRoomName: string,
     currentConnectedRoomId: string | null
 }
 
@@ -25,9 +24,10 @@ interface Message {
 
 const useChat = (messagesRef: any) => {
     const socketRef = useRef<Socket | null>(null);
+    const messagesScrolledRef = useRef<boolean>(false);
+    const lastCurrentMessagesId = useRef<string>('');
 
     const [state, setState] = useState<State>({
-        createRoomName: '',
         currentConnectedRoomId: null,
         rooms: [],
     });
@@ -50,6 +50,7 @@ const useChat = (messagesRef: any) => {
     }
 
     const changeRoom = async (e: React.FormEvent<HTMLInputElement>): Promise<any> => {
+        messagesScrolledRef.current = false;
         let selectedRoom: {
             _id?: string,
             name?: string,
@@ -93,12 +94,15 @@ const useChat = (messagesRef: any) => {
             ...state,
             rooms: state.rooms.map(room => {
                 if (room._id === state.currentConnectedRoomId) {
+                    let newMessages = isUpdate ? [
+                        ...messages,
+                        ...room.messages
+                    ] : [...messages]
+                    lastCurrentMessagesId.current = newMessages[0]._id;
+
                     return {
                         ...room,
-                        messages: isUpdate ? [
-                            ...messages,
-                            ...room.messages
-                        ] : [...messages]
+                        messages: newMessages
                     }
                 }
                 return room;
@@ -108,6 +112,10 @@ const useChat = (messagesRef: any) => {
         if (messagesRef.current && !isUpdate) {
             messagesRef.current.scrollTop = messagesRef.current.scrollHeight
         }
+        setTimeout(() => {
+            messagesScrolledRef.current = true;
+        }, 0)
+
     }
 
     const addMessage = (newMessage: Message) => {
@@ -130,7 +138,6 @@ const useChat = (messagesRef: any) => {
         }
     }
 
-
     useEffect(() => {
         socketRef.current = io("http://localhost:3001", {
             query: {
@@ -144,19 +151,16 @@ const useChat = (messagesRef: any) => {
         fetchRooms();
     }, [])
 
-    const lastCurrentMessageId = useMemo(() => {
-        let currentRoom = state.rooms.find(room => room._id === state.currentConnectedRoomId);
-        return currentRoom && currentRoom.messages.length ? currentRoom.messages[0] : null
-    }, [state.rooms])
+    const onScroll = useCallback((e: any) => {
+        if (e.currentTarget.scrollTop <= 100 && socketRef.current && messagesScrolledRef.current && lastCurrentMessagesId.current) {
+            messagesScrolledRef.current = false;
+            socketRef.current.emit('getMessages', state.currentConnectedRoomId, lastCurrentMessagesId.current, 5)
+        }
+    }, [lastCurrentMessagesId.current])
 
     useEffect(() => {
-        let onScroll = (e: any) => {
-            if (e.currentTarget.scrollTop <= 100 && socketRef.current) {
-                socketRef.current.emit('getMessages', state.currentConnectedRoomId, lastCurrentMessageId && lastCurrentMessageId._id, 5)
-            }
-        }
-        if (socketRef.current && state.currentConnectedRoomId) {
-            messagesRef.current && messagesRef.current.addEventListener('scroll', onScroll)
+        if (socketRef.current && state.currentConnectedRoomId && messagesRef.current) {
+            messagesRef.current.addEventListener('scroll', onScroll)
         }
         return () => {
             messagesRef.current && messagesRef.current.removeEventListener('scroll', onScroll)

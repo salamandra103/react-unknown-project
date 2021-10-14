@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { NavLink, useHistory } from 'react-router-dom';
+import { AxiosResponse } from 'axios'
+
+import api from "@/utils/api"
+
 import style from '@styles/pages/SignIn.module.scss'
 
 
@@ -24,44 +28,57 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
         isRegister: props.match.path === '/register'
     });
 
-    function handleSubmit(e: React.SyntheticEvent): void {
+    const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
-        let users = localStorage.getItem('registerUserList');
-        let parseUsers = (users && JSON.parse(users)) || [];
+        // let users = localStorage.getItem('registerUserList');
+        // let parseUsers = (users && JSON.parse(users)) || [];
 
         if (state.isRegister) {
-            if (parseUsers.length) {
-                parseUsers.find(({ login, password }: User) => {
-                    if (login === state.login) {
-                        throw new Error(`Пользователь ${login} уже существует`)
-                        return true;
-                    } else {
-                        localStorage.setItem('registerUserList', JSON.stringify([...parseUsers, {
-                            login: state.login,
-                            password: state.password
-                        }]))
-                        history.push('/signin')
-                    }
-                })
-            } else {
-                localStorage.setItem('registerUserList', JSON.stringify([{
-                    login: state.login,
-                    password: state.password
-                }]))
-                history.push('/signin')
-            }
-        } else {
-            if (parseUsers.length) {
-                parseUsers.find(({ login, password }: User) => {
-                    if (login === state.login) {
-                        if (password === state.password) {
-                            history.push('/')
-                        }
-                    }
-                })
-            } else {
-                throw new Error('Пользователь не найден')
-            }
+            let data: AxiosResponse<any[]> = await api.post('auth/signup', {
+                email: state.login,
+                password: state.password
+            });
+            console.log(data);
+
+
+            // if (parseUsers.length) {
+            //     parseUsers.find(({ login, password }: User) => {
+            //         if (login === state.login) {
+            //             throw new Error(`Пользователь ${login} уже существует`)
+            //             return true;
+            //         } else {
+            //             localStorage.setItem('registerUserList', JSON.stringify([...parseUsers, {
+            //                 login: state.login,
+            //                 password: state.password
+            //             }]))
+            //             history.push('/signin')
+            //         }
+            //     })
+            // } else {
+            //     localStorage.setItem('registerUserList', JSON.stringify([{
+            //         login: state.login,
+            //         password: state.password
+            //     }]))
+            //     history.push('/signin')
+            // }
+        }
+        else {
+            let data: AxiosResponse<any[]> = await api.post('auth/login', {
+                email: state.login,
+                password: state.password
+            });
+            console.log(data);
+            // if (parseUsers.length) {
+            //     parseUsers.find(({ login, password }: User) => {
+            //         if (login === state.login) {
+            //             if (password === state.password) {
+            //                 history.push('/')
+            //             }
+            //         }
+            //     })
+            // } else {
+            //     throw new Error('Пользователь не найден')
+            // }
         }
 
     }

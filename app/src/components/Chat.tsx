@@ -13,21 +13,7 @@ interface State {
     createRoomName: string,
 }
 
-interface Room {
-    _id: string,
-    name?: string,
-    active: boolean,
-    messages: Array<Message>,
-}
-
-interface Message {
-    value: string,
-    author?: string,
-    _id: string
-}
-
 const Chat = () => {
-    const socketRef = useRef<Socket | null>(null);
     const messagesRef = useRef<HTMLDivElement | null>(null);
 
     const { socket, rooms, changeRoom, currentConnectedRoomId, fetchRooms } = useChat(messagesRef);
@@ -84,24 +70,7 @@ const Chat = () => {
         }
     }
 
-    // let currentMessages () => {
-    //     if (rooms.length) {
-    //         debugger
-    //         let currentRoom = rooms.find(room => room._id === currentConnectedRoomId);
-    //         return currentRoom && currentRoom.messages.map(item => {
-    //             return (
-    //                 <div key={item._id} className={`messages__item`}>
-    //                     <span className="messages__author">{item.author}</span>
-    //                     <span>{item.value}</span>
-    //                 </div>
-    //             )
-    //         });
-    //     } else {
-    //         return null;
-    //     }
-    // }
-
-    let currentMessages = useMemo(() => {
+    const currentMessages = useMemo(() => {
         if (rooms.length) {
             let currentRoom = rooms.find(room => room._id === currentConnectedRoomId);
             return currentRoom && currentRoom.messages.map(item => {
