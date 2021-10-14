@@ -144,26 +144,24 @@ const useChat = (messagesRef: any) => {
         fetchRooms();
     }, [])
 
-    // const lastCurrentMessageId = useMemo(() => {
-    //     let currentRoom = state.rooms.find(room => room._id === state.currentConnectedRoomId);
-    //     return currentRoom && currentRoom.messages.length ? currentRoom.messages[0]._id : null
-    // }, [state.rooms])
+    const lastCurrentMessageId = useMemo(() => {
+        let currentRoom = state.rooms.find(room => room._id === state.currentConnectedRoomId);
+        return currentRoom && currentRoom.messages.length ? currentRoom.messages[0] : null
+    }, [state.rooms])
 
-    // useEffect(() => {
-
-    //     let onScroll = (e: any) => {
-    //         if (e.currentTarget.scrollTop <= 100 && socketRef.current) {
-    //             debugger
-    //             socketRef.current.emit('getMessages', state.currentConnectedRoomId, lastCurrentMessageId, 5)
-    //         }
-    //     }
-    //     if (socketRef.current && state.currentConnectedRoomId) {
-    //         messagesRef.current && messagesRef.current.addEventListener('scroll', onScroll)
-    //     }
-    //     return () => {
-    //         messagesRef.current && messagesRef.current.removeEventListener('scroll', onScroll)
-    //     }
-    // }, [state.rooms])
+    useEffect(() => {
+        let onScroll = (e: any) => {
+            if (e.currentTarget.scrollTop <= 100 && socketRef.current) {
+                socketRef.current.emit('getMessages', state.currentConnectedRoomId, lastCurrentMessageId && lastCurrentMessageId._id, 5)
+            }
+        }
+        if (socketRef.current && state.currentConnectedRoomId) {
+            messagesRef.current && messagesRef.current.addEventListener('scroll', onScroll)
+        }
+        return () => {
+            messagesRef.current && messagesRef.current.removeEventListener('scroll', onScroll)
+        }
+    }, [state.rooms])
 
     return {
         socket: socketRef.current,
