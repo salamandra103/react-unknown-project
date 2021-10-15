@@ -25,7 +25,7 @@ const routes: {
             path: '/',
             title: 'Main',
             component: Main,
-            requiredAuth: true,
+            requiredAuth: false,
             layout: LoginLayout,
             options: {
                 isNav: true

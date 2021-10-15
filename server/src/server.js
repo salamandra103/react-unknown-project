@@ -2,6 +2,7 @@ const http = require("http");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const { Server } = require("socket.io");
+const { verifyAccessToken } = require("./middleware/auth");
 
 dotenv.config();
 
@@ -17,7 +18,24 @@ const server = http.createServer(app);
 const io = new Server(server, {
 	cors: "*",
 });
+
+// io.use((socket, next) => {
+// 	next();
+// 	// setTimeout(() => {
+// 	// 	console.log(2);
+// 	// 	next();
+// 	// }, 2000);
+// });
+io.use((socket, next) => {
+	try {
+		verifyAccessToken(socket.request, {}, next);
+	} catch (e) {
+		console.log(e);
+	}
+});
+
 io.on("connection", (socket) => {
+	console.log(1);
 	chatControllet.connect(io, socket);
 });
 

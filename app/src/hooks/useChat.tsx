@@ -139,7 +139,15 @@ const useChat = (messagesRef: any) => {
     }
 
     useEffect(() => {
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        debugger
         socketRef.current = io("http://localhost:3001", {
+            // auth: {
+            //     token: 'dsad'
+            // },
+            extraHeaders: {
+                'Authorization': user ? user.accessToken : ''
+            },
             query: {
                 testValue: 'Test'
             }

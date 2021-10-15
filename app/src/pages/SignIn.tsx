@@ -34,7 +34,7 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
         // let parseUsers = (users && JSON.parse(users)) || [];
 
         if (state.isRegister) {
-            let data: AxiosResponse<any[]> = await api.post('auth/signup', {
+            let { data }: AxiosResponse<any[]> = await api.post('auth/signup', {
                 email: state.login,
                 password: state.password
             });
@@ -63,11 +63,11 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
             // }
         }
         else {
-            let data: AxiosResponse<any[]> = await api.post('auth/login', {
+            let { data }: AxiosResponse<any[]> = await api.post('auth/login', {
                 email: state.login,
                 password: state.password
             });
-            console.log(data);
+            localStorage.setItem('user', JSON.stringify(data))
             // if (parseUsers.length) {
             //     parseUsers.find(({ login, password }: User) => {
             //         if (login === state.login) {
