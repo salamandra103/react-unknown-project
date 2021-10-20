@@ -140,11 +140,11 @@ const useChat = (messagesRef: any) => {
 
     useEffect(() => {
         let user = JSON.parse(localStorage.getItem('user') || '{}');
-        debugger
         socketRef.current = io("http://localhost:3001", {
             // auth: {
             //     token: 'dsad'
             // },
+            // reconnection: false,
             extraHeaders: {
                 'Authorization': user ? user.accessToken : ''
             },
@@ -155,6 +155,9 @@ const useChat = (messagesRef: any) => {
 
         socketRef.current.on('addMessage', addMessage);
         socketRef.current.on('getMessages', getMessage);
+        socketRef.current.on("connect_error", (socket) => {
+            console.log(socket.message)
+        });
 
         fetchRooms();
     }, [])

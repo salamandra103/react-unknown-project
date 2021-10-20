@@ -4,6 +4,7 @@ import { NavLink, useHistory } from 'react-router-dom';
 import { AxiosResponse } from 'axios'
 
 import api from "@/utils/api"
+import { AuthContext } from '@/contexts/auth';
 
 import style from '@styles/pages/SignIn.module.scss'
 
@@ -67,7 +68,7 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
                 email: state.login,
                 password: state.password
             });
-            localStorage.setItem('user', JSON.stringify(data))
+            localStorage.setItem('user_info', JSON.stringify(data))
             // if (parseUsers.length) {
             //     parseUsers.find(({ login, password }: User) => {
             //         if (login === state.login) {

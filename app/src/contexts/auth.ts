@@ -4,4 +4,7 @@ import React from 'react';
 //     auth: boolean
 // }
 
-export const AuthContext = React.createContext<boolean | null>(null)
+export const AuthContext = React.createContext<{
+    isAuth: boolean | null,
+    setAuth: any
+} | null>(null)

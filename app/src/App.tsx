@@ -8,9 +8,13 @@ import LogoutLayout from '@/layouts/LogoutLayout'
 import store from "@/store";
 import routes from "@/routes";
 
+import useAuth from '@/hooks/useAuth'
+
 import { AuthContext } from '@/contexts/auth';
 
 function App() {
+	const { isAuth, setAuth } = useAuth();
+
 	const routeComponents = routes.map(({ path, component, requiredAuth, layout, ...rest }, key) => {
 		if (layout) {
 			return (
@@ -19,7 +23,7 @@ function App() {
 						return (<AuthContext.Consumer>
 							{
 								auth => {
-									return auth ? React.createElement(layout, props, React.createElement(component, props)) : <Redirect to="/signin" />
+									return isAuth ? React.createElement(layout, props, React.createElement(component, props)) : <Redirect to="/signin" />
 								}
 							}
 						</AuthContext.Consumer>)
@@ -34,7 +38,7 @@ function App() {
 
 	return (
 		<Provider store={store}>
-			<AuthContext.Provider value={false}>
+			<AuthContext.Provider value={{ isAuth, setAuth }}>
 				<BrowserRouter basename="/">
 					<Switch>
 						{routeComponents}

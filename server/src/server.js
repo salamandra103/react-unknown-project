@@ -17,6 +17,7 @@ const server = http.createServer(app);
 // Покдлючение socket
 const io = new Server(server, {
 	cors: "*",
+	connectTimeout: 5000,
 });
 
 // io.use((socket, next) => {
@@ -30,7 +31,8 @@ io.use((socket, next) => {
 	try {
 		verifyAccessToken(socket.request, {}, next);
 	} catch (e) {
-		console.log(e);
+		console.log(e.message);
+		next(e);
 	}
 });
 
