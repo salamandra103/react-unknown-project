@@ -160,6 +160,10 @@ const useChat = (messagesRef: any) => {
         });
 
         fetchRooms();
+
+        return () => {
+            socketRef.current && socketRef.current.disconnect()
+        }
     }, [])
 
     const onScroll = useCallback((e: any) => {

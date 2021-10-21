@@ -10,5 +10,17 @@
         "allowJs": false,
         "sourceMap": true,
         "allowSyntheticDefaultImports": true,
+        "baseUrl": "./",
+        "paths": {
+            "@/*": [
+                "src/*"
+            ],
+            "@styles/*": [
+                "src/assets/styles/*"
+            ],
+            "@images/*": [
+                "src/assets/images/*"
+            ],
+        }
     },
 }

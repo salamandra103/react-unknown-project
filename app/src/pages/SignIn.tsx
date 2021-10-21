@@ -5,6 +5,7 @@ import { AxiosResponse } from 'axios'
 
 import api from "@/utils/api"
 import { AuthContext } from '@/contexts/auth';
+import useAuth from '@/hooks/useAuth';
 
 import style from '@styles/pages/SignIn.module.scss'
 
@@ -22,6 +23,8 @@ interface User {
 
 const SignIn = (props: RouteComponentProps): JSX.Element => {
     const history = useHistory();
+    const { isAuth, updateUserHandler } = useAuth();
+
 
     const [state, setState] = useState<State>({
         login: '',
@@ -31,57 +34,28 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
-        // let users = localStorage.getItem('registerUserList');
-        // let parseUsers = (users && JSON.parse(users)) || [];
-
         if (state.isRegister) {
-            let { data }: AxiosResponse<any[]> = await api.post('auth/signup', {
-                email: state.login,
-                password: state.password
-            });
-            console.log(data);
-
-
-            // if (parseUsers.length) {
-            //     parseUsers.find(({ login, password }: User) => {
-            //         if (login === state.login) {
-            //             throw new Error(`Пользователь ${login} уже существует`)
-            //             return true;
-            //         } else {
-            //             localStorage.setItem('registerUserList', JSON.stringify([...parseUsers, {
-            //                 login: state.login,
-            //                 password: state.password
-            //             }]))
-            //             history.push('/signin')
-            //         }
-            //     })
-            // } else {
-            //     localStorage.setItem('registerUserList', JSON.stringify([{
-            //         login: state.login,
-            //         password: state.password
-            //     }]))
-            //     history.push('/signin')
-            // }
+            try {
+                let { data }: AxiosResponse<any[]> = await api.post('auth/signup', {
+                    email: state.login,
+                    password: state.password
+                });
+                console.log(data);
+                history.push('/signin')
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            try {
+                let { data }: AxiosResponse<any[]> = await api.post('auth/login', {
+                    email: state.login,
+                    password: state.password
+                });
+                updateUserHandler(data)
+            } catch (error) {
+                console.error(error);
+            }
         }
-        else {
-            let { data }: AxiosResponse<any[]> = await api.post('auth/login', {
-                email: state.login,
-                password: state.password
-            });
-            localStorage.setItem('user_info', JSON.stringify(data))
-            // if (parseUsers.length) {
-            //     parseUsers.find(({ login, password }: User) => {
-            //         if (login === state.login) {
-            //             if (password === state.password) {
-            //                 history.push('/')
-            //             }
-            //         }
-            //     })
-            // } else {
-            //     throw new Error('Пользователь не найден')
-            // }
-        }
-
     }
 
     function handleChange(e: React.FormEvent<HTMLInputElement>): void {
