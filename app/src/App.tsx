@@ -8,33 +8,48 @@ import LogoutLayout from '@/layouts/LogoutLayout'
 import store from "@/store";
 import routes from "@/routes";
 
+import { AuthContext } from "@/contexts/auth";
+import useAuth from "@/hooks/useAuth";
+
+import Main from '@/pages/Main'
+import SignIn from '@/pages/SignIn'
+import Error404 from '@/pages/Error404'
+
 
 function App() {
-	const [auth, setAuth] = useState(false);
+	debugger
+	const _auth = useAuth();
+	debugger
 
 	const routeComponents = routes.map(({ path, component, requiredAuth, layout, ...rest }, key) => {
 		if (layout) {
 			return (
 				<Route exact {...rest} path={path} key={key} render={(props) => {
-					if (requiredAuth) {
-						return auth ? React.createElement(layout, props, React.createElement(component, props)) : <Redirect to="/signin" />
+					if ((path === '/registration' || path === '/signin') && _auth.user) {
+						return <Redirect to="/" />
 					} else {
-						return React.createElement(layout, props, React.createElement(component, props))
+						if (requiredAuth) {
+							return _auth.user ? React.createElement(layout, props, React.createElement(component, props)) : <Redirect to="/signin" />
+						} else {
+							return React.createElement(layout, props, React.createElement(component, props))
+						}
 					}
 				}} />
 			)
 		}
-		return <Route path={path} component={component} key={key} />
+		return (<Route path={path} render={props => React.createElement(component, props)} key={key} />)
 	});
 
 	return (
 		<Provider store={store}>
 			<BrowserRouter basename="/">
+				{/* <AuthContext.Provider value={_auth}> */}
 				<Switch>
 					{routeComponents}
 				</Switch>
+				{/* </AuthContext.Provider> */}
 			</BrowserRouter>
-		</Provider>
+		</Provider >
 	);
 }
 

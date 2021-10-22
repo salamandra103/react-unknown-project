@@ -1,25 +1,48 @@
 import { useRef, useEffect, useState, useContext } from 'react'
+import { AxiosResponse } from 'axios'
+
+import api from "@/utils/api"
 
 
-const useAuth = (): { isAuth: boolean, updateUserHandler: (userInfo: any) => void } => {
-    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user_info') || 'null'))
-    const [isAuth, setAuth] = useState(false)
+const useAuth = () => {
+    const [user, setUser] = useState<any>(JSON.parse(localStorage.getItem('user_info') || 'null'));
 
-    const updateUserHandler = (userInfo: any) => {
-        if (userInfo) {
-            localStorage.setItem('user_info', JSON.stringify(userInfo));
-            setUser(userInfo)
-        } else {
-            localStorage.removeItem('user_info');
-            setUser(null)
+    const signup = async (email: string, password: string) => {
+        try {
+            let { data }: AxiosResponse<any[]> = await api.post('auth/signup', {
+                email,
+                password
+            });
+        } catch (error) {
+            console.error(error);
         }
     }
 
-    useEffect(() => {
-        user ? setAuth(true) : setAuth(false)
-    }, [user])
+    const signin = async (email: string, password: string) => {
+        try {
+            let { data }: AxiosResponse<any[]> = await api.post('auth/login', {
+                email,
+                password
+            });
+            setUser(data);
+            localStorage.setItem('user_info', JSON.stringify(data));
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
-    return { isAuth, updateUserHandler };
+    const signout = async () => {
+        setUser(null);
+        localStorage.removeItem('user_info');
+    }
+    debugger
+    return {
+        user,
+        signup,
+        signin,
+        signout
+    }
+
 }
 
 export default useAuth;

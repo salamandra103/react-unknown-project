@@ -9,7 +9,7 @@ import { RouteComponentProps, Router } from 'react-router';
 
 
 const routes: {
-    path: string,
+    path?: string,
     title?: string
     component: (props: RouteComponentProps) => JSX.Element,
     requiredAuth?: boolean,
@@ -41,12 +41,12 @@ const routes: {
             }
         },
         {
-            path: '/register',
+            path: '/registration',
             component: SignIn,
             layout: LogoutLayout
         },
         {
-            path: '/*',
+            path: '*',
             component: Error404,
         },
     ];

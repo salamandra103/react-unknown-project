@@ -1,64 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { NavLink, useHistory } from 'react-router-dom';
 import { AxiosResponse } from 'axios'
 
 import api from "@/utils/api"
 import { AuthContext } from '@/contexts/auth';
-import useAuth from '@/hooks/useAuth';
+import useAuth from "@/hooks/useAuth";
 
 import style from '@styles/pages/SignIn.module.scss'
 
 
 interface State {
-    login: string,
+    email: string,
     password: string,
     isRegister: boolean
 }
 
-interface User {
-    login: string,
-    password: string
-}
-
 const SignIn = (props: RouteComponentProps): JSX.Element => {
     const history = useHistory();
-    const { isAuth, updateUserHandler } = useAuth();
+    // const auth = useContext(AuthContext)
+    // const _auth = useAuth();
+    debugger
 
+    const [user, setUser] = useState<any>(JSON.parse(localStorage.getItem('user_info') || 'null'));
 
     const [state, setState] = useState<State>({
-        login: '',
+        email: '',
         password: '',
         isRegister: props.match.path === '/register'
     });
+    debugger
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (state.isRegister) {
-            try {
-                let { data }: AxiosResponse<any[]> = await api.post('auth/signup', {
-                    email: state.login,
-                    password: state.password
-                });
-                console.log(data);
-                history.push('/signin')
-            } catch (error) {
-                console.error(error);
-            }
+            // _auth.signup(state.login, state.password);
+            // history.push('/signin');
         } else {
             try {
                 let { data }: AxiosResponse<any[]> = await api.post('auth/login', {
-                    email: state.login,
+                    email: state.email,
                     password: state.password
                 });
-                updateUserHandler(data)
+                setUser(data);
+                localStorage.setItem('user_info', JSON.stringify(data));
             } catch (error) {
                 console.error(error);
             }
+            // _auth.signin(state.login, state.password);
+            // history.push('/');
         }
     }
 
-    function handleChange(e: React.FormEvent<HTMLInputElement>): void {
+    const handleChange = (e: React.FormEvent<HTMLInputElement>): void => {
         setState({
             ...state,
             [e.currentTarget.name]: e.currentTarget.value
@@ -72,7 +66,7 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
                     <h3>{!state.isRegister ? 'SignIn' : 'Register'} </h3>
                     <form className={style.form} onSubmit={handleSubmit}>
                         <div className={style.field}>
-                            <input name="login" type="text" placeholder="Enter login" defaultValue={state.login} onChange={handleChange} />
+                            <input name="email" type="text" placeholder="Enter login" defaultValue={state.email} onChange={handleChange} />
                         </div>
                         <div className={style.field}>
                             <input name="password" type="text" placeholder="Enter password" defaultValue={state.password} onChange={handleChange} />

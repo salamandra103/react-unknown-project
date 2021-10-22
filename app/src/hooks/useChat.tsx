@@ -138,40 +138,40 @@ const useChat = (messagesRef: any) => {
         }
     }
 
-    useEffect(() => {
-        let user = JSON.parse(localStorage.getItem('user') || '{}');
-        socketRef.current = io("http://localhost:3001", {
-            // auth: {
-            //     token: 'dsad'
-            // },
-            // reconnection: false,
-            extraHeaders: {
-                'Authorization': user ? user.accessToken : ''
-            },
-            query: {
-                testValue: 'Test'
-            }
-        });
-
-        socketRef.current.on('addMessage', addMessage);
-        socketRef.current.on('getMessages', getMessage);
-        socketRef.current.on("connect_error", (socket) => {
-            console.log(socket.message)
-        });
-
-        fetchRooms();
-
-        return () => {
-            socketRef.current && socketRef.current.disconnect()
-        }
-    }, [])
-
     const onScroll = useCallback((e: any) => {
         if (e.currentTarget.scrollTop <= 100 && socketRef.current && messagesScrolledRef.current && lastCurrentMessagesId.current) {
             messagesScrolledRef.current = false;
             socketRef.current.emit('getMessages', state.currentConnectedRoomId, lastCurrentMessagesId.current, 5)
         }
     }, [lastCurrentMessagesId.current])
+
+    // useEffect(() => {
+    //     let user = JSON.parse(localStorage.getItem('user') || '{}');
+    //     socketRef.current = io("http://localhost:3001", {
+    //         // auth: {
+    //         //     token: 'dsad'
+    //         // },
+    //         // reconnection: false,
+    //         extraHeaders: {
+    //             'Authorization': user ? user.accessToken : ''
+    //         },
+    //         query: {
+    //             testValue: 'Test'
+    //         }
+    //     });
+
+    //     socketRef.current.on('addMessage', addMessage);
+    //     socketRef.current.on('getMessages', getMessage);
+    //     socketRef.current.on("connect_error", (socket) => {
+    //         console.log(socket.message)
+    //     });
+
+    //     fetchRooms();
+
+    //     return () => {
+    //         socketRef.current && socketRef.current.disconnect()
+    //     }
+    // }, [])
 
     useEffect(() => {
         if (socketRef.current && state.currentConnectedRoomId && messagesRef.current) {
