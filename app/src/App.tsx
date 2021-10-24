@@ -17,9 +17,7 @@ import Error404 from '@/pages/Error404'
 
 
 function App() {
-	debugger
 	const _auth = useAuth();
-	debugger
 
 	const routeComponents = routes.map(({ path, component, requiredAuth, layout, ...rest }, key) => {
 		if (layout) {
@@ -43,11 +41,11 @@ function App() {
 	return (
 		<Provider store={store}>
 			<BrowserRouter basename="/">
-				{/* <AuthContext.Provider value={_auth}> */}
-				<Switch>
-					{routeComponents}
-				</Switch>
-				{/* </AuthContext.Provider> */}
+				<AuthContext.Provider value={_auth}>
+					<Switch>
+						{routeComponents}
+					</Switch>
+				</AuthContext.Provider>
 			</BrowserRouter>
 		</Provider >
 	);

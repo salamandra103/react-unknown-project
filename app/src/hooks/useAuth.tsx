@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useContext } from 'react'
+import { useState } from 'react'
 import { AxiosResponse } from 'axios'
 
 import api from "@/utils/api"
@@ -9,7 +9,7 @@ const useAuth = () => {
 
     const signup = async (email: string, password: string) => {
         try {
-            let { data }: AxiosResponse<any[]> = await api.post('auth/signup', {
+            let { data }: AxiosResponse<any> = await api.post('auth/signup', {
                 email,
                 password
             });
@@ -20,7 +20,7 @@ const useAuth = () => {
 
     const signin = async (email: string, password: string) => {
         try {
-            let { data }: AxiosResponse<any[]> = await api.post('auth/login', {
+            let { data }: AxiosResponse<any> = await api.post('auth/login', {
                 email,
                 password
             });
@@ -35,12 +35,24 @@ const useAuth = () => {
         setUser(null);
         localStorage.removeItem('user_info');
     }
-    debugger
+
+    const updateToken = async () => {
+        try {
+            const { data }: AxiosResponse<any> = await api.post("auth/token", {
+                id: localStorage.getItem("user_info") ? JSON.parse(localStorage.getItem("user_info") || '{}').id : "",
+            });
+            localStorage.setItem("user_info", JSON.stringify(data));
+        } catch (error) {
+            signout();
+        }
+    }
+
     return {
         user,
         signup,
         signin,
-        signout
+        signout,
+        updateToken
     }
 
 }

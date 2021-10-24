@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback, useContext } from "react";
 import io, { Socket } from 'socket.io-client'
 import { AxiosResponse } from 'axios'
+
+import { AuthContext } from "@/contexts/auth";
 
 import api from "@/utils/api"
 
@@ -26,6 +28,7 @@ const useChat = (messagesRef: any) => {
     const socketRef = useRef<Socket | null>(null);
     const messagesScrolledRef = useRef<boolean>(false);
     const lastCurrentMessagesId = useRef<string>('');
+    const auth = useContext(AuthContext);
 
     const [state, setState] = useState<State>({
         currentConnectedRoomId: null,
@@ -145,33 +148,38 @@ const useChat = (messagesRef: any) => {
         }
     }, [lastCurrentMessagesId.current])
 
-    // useEffect(() => {
-    //     let user = JSON.parse(localStorage.getItem('user') || '{}');
-    //     socketRef.current = io("http://localhost:3001", {
-    //         // auth: {
-    //         //     token: 'dsad'
-    //         // },
-    //         // reconnection: false,
-    //         extraHeaders: {
-    //             'Authorization': user ? user.accessToken : ''
-    //         },
-    //         query: {
-    //             testValue: 'Test'
-    //         }
-    //     });
+    useEffect(() => {
+        socketRef.current = io("http://localhost:3001", {
+            // auth: {
+            //     token: 'dsad'
+            // },
+            // reconnection: false,
+            extraHeaders: {
+                'Authorization': (auth && auth.user) ? auth.user.accessToken : ''
+            },
+            query: {
+                testValue: 'Test'
+            }
+        });
 
-    //     socketRef.current.on('addMessage', addMessage);
-    //     socketRef.current.on('getMessages', getMessage);
-    //     socketRef.current.on("connect_error", (socket) => {
-    //         console.log(socket.message)
-    //     });
+        socketRef.current.on('addMessage', addMessage);
+        socketRef.current.on('getMessages', getMessage);
+        socketRef.current.on("connect_error", async (err) => {
+            if (err.message === 'jwt expired') {
+                await auth.updateToken();
+            }
 
-    //     fetchRooms();
+            if (err.message === "Refresh token expired") {
+                localStorage.removeItem("user_info");
+            }
+        });
 
-    //     return () => {
-    //         socketRef.current && socketRef.current.disconnect()
-    //     }
-    // }, [])
+        fetchRooms();
+
+        return () => {
+            socketRef.current && socketRef.current.disconnect()
+        }
+    }, [])
 
     useEffect(() => {
         if (socketRef.current && state.currentConnectedRoomId && messagesRef.current) {

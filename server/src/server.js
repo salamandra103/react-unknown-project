@@ -20,24 +20,21 @@ const io = new Server(server, {
 	connectTimeout: 5000,
 });
 
-// io.use((socket, next) => {
-// 	next();
-// 	// setTimeout(() => {
-// 	// 	console.log(2);
-// 	// 	next();
-// 	// }, 2000);
-// });
 io.use((socket, next) => {
 	try {
-		verifyAccessToken(socket.request, {}, next);
+		verifyAccessToken(socket.request, {}, next, socket);
 	} catch (e) {
 		console.log(e.message);
 		next(e);
 	}
 });
 
+io.on("disconnect", (socket) => {
+	console.log("SOCKET DISCONNECTED");
+});
+
 io.on("connection", (socket) => {
-	console.log(1);
+	console.log("SOCKET CONNECTED");
 	chatControllet.connect(io, socket);
 });
 

@@ -18,37 +18,22 @@ interface State {
 
 const SignIn = (props: RouteComponentProps): JSX.Element => {
     const history = useHistory();
-    // const auth = useContext(AuthContext)
-    // const _auth = useAuth();
-    debugger
-
-    const [user, setUser] = useState<any>(JSON.parse(localStorage.getItem('user_info') || 'null'));
+    const auth = useContext(AuthContext)
 
     const [state, setState] = useState<State>({
         email: '',
         password: '',
         isRegister: props.match.path === '/register'
     });
-    debugger
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (state.isRegister) {
-            // _auth.signup(state.login, state.password);
-            // history.push('/signin');
+            auth.signup(state.email, state.password);
+            history.push('/signin');
         } else {
-            try {
-                let { data }: AxiosResponse<any[]> = await api.post('auth/login', {
-                    email: state.email,
-                    password: state.password
-                });
-                setUser(data);
-                localStorage.setItem('user_info', JSON.stringify(data));
-            } catch (error) {
-                console.error(error);
-            }
-            // _auth.signin(state.login, state.password);
-            // history.push('/');
+            auth.signin(state.email, state.password);
+            history.push('/');
         }
     }
 
@@ -66,7 +51,7 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
                     <h3>{!state.isRegister ? 'SignIn' : 'Register'} </h3>
                     <form className={style.form} onSubmit={handleSubmit}>
                         <div className={style.field}>
-                            <input name="email" type="text" placeholder="Enter login" defaultValue={state.email} onChange={handleChange} />
+                            <input name="email" type="text" placeholder="Enter email" defaultValue={state.email} onChange={handleChange} />
                         </div>
                         <div className={style.field}>
                             <input name="password" type="text" placeholder="Enter password" defaultValue={state.password} onChange={handleChange} />

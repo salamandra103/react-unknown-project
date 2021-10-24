@@ -1,33 +1,62 @@
-.nav {
-    padding: 0 0;
+.navigation {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    justify-content: space-between;
     background-color: #9839e0;
 
+    nav {
+        padding: 0 0;
+        :global {
+            ul {
+                display: flex;
+                margin: 0px;
 
-    :global {
-        ul {
-            display: flex;
-            margin: 0px;
+                li {
+                    transition: .2s;
 
-            li {
-                transition: .2s;
+                    &:hover {
+                        background-color: #ff7900;
 
-                &:hover {
-                    background-color: #ff7900;
+                        a {
+                            transform: translateY(-2px);
+                        }
+                    }
 
                     a {
-                        transform: translateY(-2px);
+                        display: block;
+                        font-size: 16px;
+                        font-weight: 300;
+                        padding: 15px 30px;
+                        color: #fff;
+                        transition: .2s;
                     }
-                }
-
-                a {
-                    display: block;
-                    font-size: 16px;
-                    font-weight: 300;
-                    padding: 15px 30px;
-                    color: #fff;
-                    transition: .2s;
                 }
             }
         }
     }
+
+    :global {
+        .tools {
+            // padding: 0 30px;
+            .exit {
+                padding-left: 40px;
+                padding-right: 30px;
+                height: 100%;
+                background-image: url('../../images/icons/exit.png');
+                background-position: 50% 50%;
+                background-repeat: no-repeat;
+                background-size: 30px;
+                background-color: transparent;
+                transition: .2s;
+
+                &:hover {
+                    background-color: #ff7900; 
+                }
+            }
+        }
+
+    }
+
+    
 }
