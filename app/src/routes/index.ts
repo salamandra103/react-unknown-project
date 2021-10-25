@@ -1,6 +1,7 @@
 import React from 'react';
 import Main from '@/pages/Main'
 import SignIn from '@/pages/SignIn'
+import Profile from '@/pages/Profile'
 import Error404 from '@/pages/Error404'
 
 import LoginLayout from '@/layouts/LoginLayout'
@@ -30,6 +31,13 @@ const routes: {
             options: {
                 isNav: true
             }
+        },
+        {
+            path: '/profile',
+            title: "Profile",
+            component: Profile,
+            requiredAuth: true,
+            layout: LoginLayout,
         },
         {
             path: '/signin',

@@ -5,124 +5,174 @@
     justify-content: space-between;
     background-color: #9839e0;
 
-    nav {
-        padding: 0 0;
-
-        ul {
-            display: flex;
-            margin: 0px;
-
-            li {
-                transition: .2s;
-
-                &:hover {
-                    background-color: #ff7900;
-
-                    a {
-                        transform: translateY(-2px);
-                    }
-                }
-
-                a {
-                    display: block;
-                    font-size: 16px;
-                    font-weight: 300;
-                    padding: 15px 30px;
-                    color: #fff;
+    :global {
+        .menu {
+            padding: 0 0;
+    
+            ul {
+                display: flex;
+                margin: 0px;
+    
+                li {
                     transition: .2s;
+    
+                    &:hover {
+                        background-color: #ff7900;
+    
+                        a {
+                            transform: translateY(-2px);
+                        }
+                    }
+    
+                    a {
+                        display: block;
+                        font-size: 16px;
+                        font-weight: 300;
+                        padding: 15px 30px;
+                        color: #fff;
+                        transition: .2s;
+                    }
                 }
             }
         }
-    }
 
-    :global {
         .tools {
             position: relative;
             background-color: #9839e0;
+            
+            
 
-            &__icon {
-                width: 80px;
+            &-menu {
                 height: 100%;
-                position: relative;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                overflow: hidden;
-                cursor: pointer;
-                transition: .2s;
-                animation-play-state: initial;
-
-
-                & :local {
-                    @keyframes animate {
-                        from {
-                            background-color: #fff;
-                        }
-
-                        to {
-                            background-color: #000;
-                        }
-                    }
-
-                    animation: animate 2s normal;
-                }
 
                 &:hover {
-                    background-color: #ff7900;
-                    animation: animate 2s ease-in-out 2s normal;
+                    .tools-menu__wrapper {
+                        transform: scale(1);
+                    }
+
+                    .tools-menu__icon {
+                        background-color: #ff7900;
+                        span {
+                            width: 30px;
+                        }
+    
+                        &:before, &:after {
+                            transform: translate(-50%, -60%);
+                            width: 30px;
+                        }
+                        
+                        &:before {
+                            top: 30%;
+                            left: 50%;
+                            
+                        }
+                        &:after {
+                            top: 70%;
+                            left: 50%;
+                        }
+                    }
                 }
 
-                span {
-                    width: 10px;
-                    height: 10px;
-                    background-color: #fff;
-                    display: block;
-                    border-radius: 999px;
-                }
-
-                &:before,
-                &:after {
-                    display: block;
-                    content: '';
-                    border-radius: 999px;
-                    width: 10px;
-                    height: 10px;
-                    background-color: #fff;
+                &__wrapper {
+                    padding-top: 10px;
+                    padding-right: 10px;
                     position: absolute;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    transition: .2s;
+                    top: 100%;
+                    right: 0;
+                    transition: 0.2s;       
+                    transform: scale(0);
+
                 }
 
-                &:before {
-                    left: 20px;
+                &__list {
+                    border-radius: 5px;
+                    box-shadow: 0 0 5px rgba(0,0,0,.25);
+                    overflow: hidden;
+                    min-width: 150px;
                 }
-
-                &:after {
-                    right: 20px;
-                }
-            }
-
-            &-list {
-                position: absolute;
-                right: 0;
-                top: 0;
 
                 &__item {
+               
                     &.exit {
-                        padding-left: 40px;
-                        padding-right: 30px;
-                        height: 100%;
                         background-image: url('../../images/icons/exit.png');
                         background-position: 50% 50%;
                         background-repeat: no-repeat;
                         background-size: 30px;
                         background-color: transparent;
-                        transition: .2s;
+                    }
+
+                    a, button {
+                        padding: 10px 20px;
+                        width: 100%;
+                        display: block;
+                        background-color: #fff;
+                        text-align: left;
+                        color: #000;
+                        transition: .2s background-color;
+
+                        span {
+                            position: relative;
+                            transition: .1s top;
+                            top: 0;
+                        }
 
                         &:hover {
                             background-color: #ff7900;
+                            color: #fff;
                         }
+
+                        &:active {
+                            background-color: #b85600;
+                            transition: .1s background-color;
+                            span {
+                                top: 3px;
+                            }
+                        }
+                    }
+                }
+
+                &__icon {
+                    width: 60px;
+                    height: 100%;
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                    cursor: pointer;
+                    transition: .2s;
+    
+                    span {
+                        width: 5px;
+                        height: 5px;
+                        background-color: #fff;
+                        display: block;
+                        border-radius: 999px;
+                        transition: .2s;
+                        
+                       
+                    }
+    
+                    &:before,
+                    &:after {
+                        display: block;
+                        content: '';
+                        border-radius: 999px;
+                        width: 5px;
+                        height: 5px;
+                        background-color: #fff;
+                        position: absolute;
+                        top: 50%;
+                        transform: translate(0%, -60%);
+                        transition: .2s;
+                    }
+    
+                    &:before {
+                        left: 15px;
+                    }
+    
+                    &:after {
+                        left: 40px;
                     }
                 }
             }
