@@ -7,30 +7,29 @@
 
     nav {
         padding: 0 0;
-        :global {
-            ul {
-                display: flex;
-                margin: 0px;
 
-                li {
-                    transition: .2s;
+        ul {
+            display: flex;
+            margin: 0px;
 
-                    &:hover {
-                        background-color: #ff7900;
+            li {
+                transition: .2s;
 
-                        a {
-                            transform: translateY(-2px);
-                        }
-                    }
+                &:hover {
+                    background-color: #ff7900;
 
                     a {
-                        display: block;
-                        font-size: 16px;
-                        font-weight: 300;
-                        padding: 15px 30px;
-                        color: #fff;
-                        transition: .2s;
+                        transform: translateY(-2px);
                     }
+                }
+
+                a {
+                    display: block;
+                    font-size: 16px;
+                    font-weight: 300;
+                    padding: 15px 30px;
+                    color: #fff;
+                    transition: .2s;
                 }
             }
         }
@@ -38,25 +37,96 @@
 
     :global {
         .tools {
-            // padding: 0 30px;
-            .exit {
-                padding-left: 40px;
-                padding-right: 30px;
+            position: relative;
+            background-color: #9839e0;
+
+            &__icon {
+                width: 80px;
                 height: 100%;
-                background-image: url('../../images/icons/exit.png');
-                background-position: 50% 50%;
-                background-repeat: no-repeat;
-                background-size: 30px;
-                background-color: transparent;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                cursor: pointer;
                 transition: .2s;
+                animation-play-state: initial;
+
+
+                & :local {
+                    @keyframes animate {
+                        from {
+                            background-color: #fff;
+                        }
+
+                        to {
+                            background-color: #000;
+                        }
+                    }
+
+                    animation: animate 2s normal;
+                }
 
                 &:hover {
-                    background-color: #ff7900; 
+                    background-color: #ff7900;
+                    animation: animate 2s ease-in-out 2s normal;
+                }
+
+                span {
+                    width: 10px;
+                    height: 10px;
+                    background-color: #fff;
+                    display: block;
+                    border-radius: 999px;
+                }
+
+                &:before,
+                &:after {
+                    display: block;
+                    content: '';
+                    border-radius: 999px;
+                    width: 10px;
+                    height: 10px;
+                    background-color: #fff;
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    transition: .2s;
+                }
+
+                &:before {
+                    left: 20px;
+                }
+
+                &:after {
+                    right: 20px;
+                }
+            }
+
+            &-list {
+                position: absolute;
+                right: 0;
+                top: 0;
+
+                &__item {
+                    &.exit {
+                        padding-left: 40px;
+                        padding-right: 30px;
+                        height: 100%;
+                        background-image: url('../../images/icons/exit.png');
+                        background-position: 50% 50%;
+                        background-repeat: no-repeat;
+                        background-size: 30px;
+                        background-color: transparent;
+                        transition: .2s;
+
+                        &:hover {
+                            background-color: #ff7900;
+                        }
+                    }
                 }
             }
         }
 
     }
-
-    
 }

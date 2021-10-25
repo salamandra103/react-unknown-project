@@ -12,16 +12,20 @@ const verifyAccessToken = (req, res, next, socket) => {
 					console.log("Ошибка проверки токена для запроса");
 					res.status(500).send({ ...err, message: "Access token expired" });
 				} else {
-					// const error = new Error("Ошибка проверки токена для сокета");
-					// error.data = { code: "not auth" };
 					throw err;
 				}
 			} else {
-				const expiresIn = (decoded.exp * 1000 - Date.now());
-				const timeout = setTimeout(() => {
-					console.log("Timer");
-					socket.disconnect(true);
-				}, expiresIn);
+				if (socket) {
+					const expiresIn = (decoded.exp * 1000 - Date.now());
+					const timeout = setTimeout(() => {
+						socket.disconnect(true);
+					}, expiresIn);
+
+					socket.on("disconnect", () => {
+						clearTimeout(timeout);
+					});
+				}
+
 				next();
 			}
 		});

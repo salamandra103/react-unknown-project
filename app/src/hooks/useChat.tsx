@@ -5,6 +5,7 @@ import { AxiosResponse } from 'axios'
 import { AuthContext } from "@/contexts/auth";
 
 import api from "@/utils/api"
+import { LoaderOptionsPlugin } from "webpack";
 
 interface State {
     rooms: Array<Room>,
@@ -96,6 +97,7 @@ const useChat = (messagesRef: any) => {
         setState(state => ({
             ...state,
             rooms: state.rooms.map(room => {
+                debugger
                 if (room._id === state.currentConnectedRoomId) {
                     let newMessages = isUpdate ? [
                         ...messages,
@@ -173,12 +175,17 @@ const useChat = (messagesRef: any) => {
                 localStorage.removeItem("user_info");
             }
         });
-
-        fetchRooms();
+        socketRef.current.on("disconnect", () => {
+            socketRef.current?.connect();
+        });
 
         return () => {
             socketRef.current && socketRef.current.disconnect()
         }
+    }, [auth])
+
+    useEffect(() => {
+        fetchRooms();
     }, [])
 
     useEffect(() => {

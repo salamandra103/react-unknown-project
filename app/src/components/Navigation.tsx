@@ -10,6 +10,7 @@ import routes from "@/routes";
 const Navigation = () => {
     const isNavRoutes = routes.filter(route => route.options && route.options.isNav);
     const auth = useContext(AuthContext)
+    console.log(style);
 
     return (
         <div className={style.navigation}>
@@ -33,8 +34,15 @@ const Navigation = () => {
                 </ul>
             </nav>
             <div className="tools">
-                <button type="button" className="exit" onClick={auth.signout}>
-                </button>
+                {/* <button type="button" className="exit" onClick={auth.signout}>
+                </button> */}
+                <span className="tools__icon">
+                    <span></span>
+                </span>
+                {/* <ul className="tools-list">
+                    <li className="tools-list__item settings">Settings</li>
+                    <li className="tools-list__item exit">Exit</li>
+                </ul> */}
             </div>
         </div>
     )

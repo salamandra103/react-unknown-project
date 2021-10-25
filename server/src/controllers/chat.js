@@ -59,7 +59,6 @@ exports.createRoom = (req, res, next) => {
 };
 
 exports.deleteRoom = (req, res, next) => {
-	console.log(req.body);
 	Chat.findByIdAndDelete(req.body.id, (err, data) => {
 		if (err) {
 			res.status(404).send(err);

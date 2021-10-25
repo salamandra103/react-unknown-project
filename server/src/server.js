@@ -24,17 +24,11 @@ io.use((socket, next) => {
 	try {
 		verifyAccessToken(socket.request, {}, next, socket);
 	} catch (e) {
-		console.log(e.message);
 		next(e);
 	}
 });
 
-io.on("disconnect", (socket) => {
-	console.log("SOCKET DISCONNECTED");
-});
-
 io.on("connection", (socket) => {
-	console.log("SOCKET CONNECTED");
 	chatControllet.connect(io, socket);
 });
 
@@ -49,7 +43,7 @@ mongoose.connect("mongodb://localhost:27017/unknownappdb", {
 	socketTimeoutMS: 1000,
 }, (err) => {
 	if (err) {
-		return console.log(err);
+		console.log(err);
 	}
 	server.listen(port, () => {
 		console.log("Server started");

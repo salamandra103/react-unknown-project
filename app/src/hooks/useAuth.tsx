@@ -41,6 +41,7 @@ const useAuth = () => {
             const { data }: AxiosResponse<any> = await api.post("auth/token", {
                 id: localStorage.getItem("user_info") ? JSON.parse(localStorage.getItem("user_info") || '{}').id : "",
             });
+            setUser(data);
             localStorage.setItem("user_info", JSON.stringify(data));
         } catch (error) {
             signout();
