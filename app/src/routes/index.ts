@@ -1,7 +1,7 @@
 import React from 'react';
 import Main from '@/pages/Main'
 import SignIn from '@/pages/SignIn'
-import Parser from '@/pages/Parser'
+import Profile from '@/pages/Profile'
 import Error404 from '@/pages/Error404'
 
 import LoginLayout from '@/layouts/LoginLayout'
@@ -10,7 +10,7 @@ import { RouteComponentProps, Router } from 'react-router';
 
 
 const routes: {
-    path: string,
+    path?: string,
     title?: string
     component: (props: RouteComponentProps) => JSX.Element,
     requiredAuth?: boolean,
@@ -26,21 +26,18 @@ const routes: {
             path: '/',
             title: 'Main',
             component: Main,
-            requiredAuth: false,
+            requiredAuth: true,
             layout: LoginLayout,
             options: {
                 isNav: true
             }
         },
         {
-            path: '/parser',
-            title: 'Parser',
-            component: Parser,
-            requiredAuth: false,
+            path: '/profile',
+            title: "Profile",
+            component: Profile,
+            requiredAuth: true,
             layout: LoginLayout,
-            options: {
-                isNav: true
-            }
         },
         {
             path: '/signin',
@@ -52,12 +49,12 @@ const routes: {
             }
         },
         {
-            path: '/register',
+            path: '/registration',
             component: SignIn,
             layout: LogoutLayout
         },
         {
-            path: '/*',
+            path: '*',
             component: Error404,
         },
     ];

@@ -1,71 +1,27 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo, FormEvent } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo, FormEvent, UIEvent } from 'react'
 import io, { Socket } from 'socket.io-client'
 
+import api from "@/utils/api"
+
 import style from '@styles/components/Chat.module.scss'
+import { AxiosResponse } from 'axios'
+import useChat from '@/hooks/useChat'
 
 interface State {
-    currentUser: string,
-    chatform: string,
-    counter: number,
-    messages: Array<Message>,
-    rooms: Array<Room>
-}
-
-interface Room {
-    id: number,
-    name?: string,
-    active: boolean,
-    users: string[]
-}
-
-interface Message {
-    text: string,
-    author: string,
-    id: number
+    chatText: string,
+    isCreateForm: boolean,
+    createRoomName: string,
 }
 
 const Chat = () => {
-    const socketRef = useRef<Socket | null>(null);
+    const messagesRef = useRef<HTMLDivElement | null>(null);
+
+    const { socket, rooms, changeRoom, currentConnectedRoomId, fetchRooms } = useChat(messagesRef);
+
     const [state, setState] = useState<State>({
-        currentUser: 'user_1',
-        chatform: '',
-        counter: 0,
-        messages: [
-            {
-                text: 'Lorem ipsum dolor sit amet.',
-                author: 'user_1',
-                id: 1,
-            },
-            {
-                text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem aut placeat voluptas!',
-                author: 'user_1',
-                id: 2,
-            },
-            {
-                text: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis, dolore repudiandae recusandae quas veniam quam maxime dolores rem iusto adipisci saepe?',
-                author: 'user_2',
-                id: 3,
-            },
-            {
-                text: 'Lorem ipsum, dolor sit amet consectetur adipisicing.',
-                author: 'user_1',
-                id: 4,
-            }
-        ],
-        rooms: [
-            {
-                id: 1,
-                name: 'Комната 12312',
-                active: false,
-                users: ['Ivan', 'Petya']
-            },
-            {
-                id: 2,
-                name: 'Комната Adsadsac',
-                active: false,
-                users: ['Oskar', 'John']
-            }
-        ]
+        chatText: '',
+        isCreateForm: false,
+        createRoomName: '',
     });
 
     const handleChange = (e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -76,46 +32,59 @@ const Chat = () => {
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        console.log(e);
-    }
-
-    const connectRoom = async (e: React.FormEvent<HTMLInputElement>): Promise<any> => {
-        let selectedRoom: {
-            id?: number,
-            name?: string
-        } = {};
-
-        await setState({
-            ...state,
-            rooms: state.rooms.map(room => {
-                if (room.id === parseInt(e.currentTarget.value)) {
-                    selectedRoom = { ...room }
-                    return {
-                        ...room,
-                        active: !room.active
-                    }
-                }
-                return { ...room, active: false };
-            })
-        });
-
-
-        if (socketRef.current) {
-            socketRef.current.emit('connectRoom', selectedRoom.id, selectedRoom.name)
+        e.preventDefault();
+        if (currentConnectedRoomId) {
+            if (socket && state.chatText.length) {
+                socket.emit('addMessage', currentConnectedRoomId, state.chatText);
+                setState({
+                    ...state,
+                    chatText: ''
+                });
+            }
         }
     }
 
-    useEffect(() => {
-        socketRef.current = io("http://localhost:3001", {
-            query: {
-                dsa: 'dsad'
-            }
-        });
+    const createRoom = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            await api.post('chat/room', {
+                name: state.createRoomName
+            });
+            setState((state) => ({
+                ...state,
+                isCreateForm: !state.isCreateForm,
+                createRoomName: '',
+            }));
+            await fetchRooms();
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
-        socketRef.current.on('getMessage', (message) => {
-            console.log(message);
-        })
-    }, []);
+    const removeRoom = async (id: string) => {
+        try {
+            await api.delete('chat/room', { data: { id } })
+            fetchRooms();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const currentMessages = useMemo(() => {
+        if (rooms.length) {
+            let currentRoom = rooms.find(room => room._id === currentConnectedRoomId);
+            return currentRoom && currentRoom.messages.map(item => {
+                return (
+                    <div key={item._id} className={`messages__item`}>
+                        <span className="messages__author">{item.author}</span>
+                        <span>{item.value}</span>
+                    </div>
+                )
+            });
+        } else {
+            return null;
+        }
+    }, [rooms])
 
     return (
         <div className={style.chat}>
@@ -123,22 +92,15 @@ const Chat = () => {
                 <div className="form">
                     <div className="messages">
                         <div className="messages__container">
-                            <div className="messages__list">
-                                {state.messages.map(item => {
-                                    return (
-                                        <div key={item.id} className={`messages__item ${item.author === state.currentUser ? 'messages__item_right' : ''}`}>
-                                            <span className="messages__author">{item.author}</span>
-                                            <span>{item.text}</span>
-                                        </div>
-                                    )
-                                })}
+                            <div className="messages__list" ref={messagesRef}>
+                                {currentMessages}
                             </div>
                         </div>
                     </div>
                     <form onSubmit={handleSubmit}>
-                        <textarea name="chatform" cols={30} rows={10} placeholder="Введите текст" onChange={handleChange}></textarea>
+                        <textarea name="chatText" value={state.chatText} cols={30} rows={10} placeholder="Введите текст" onChange={handleChange}></textarea>
                         <div className="buttons">
-                            <button type="submit">Отправить</button>
+                            <button type="submit" disabled={!state.chatText.length}>Отправить</button>
                         </div>
                     </form>
                 </div>
@@ -146,17 +108,31 @@ const Chat = () => {
                     <h4>Комнаты</h4>
                     <ul>
                         {
-                            state.rooms.map(room => (
-                                <li key={room.id}>
+                            rooms.map(room => (
+                                <li key={room._id}>
                                     <label>
-                                        <input type="radio" onChange={connectRoom} checked={room.active} name="rooms" value={room.id} />
+                                        <input type="checkbox" onChange={changeRoom} checked={room.active} name="rooms" value={room._id} />
                                         <span>{room.name}</span>
                                     </label>
+                                    <span className={room.active ? 'delete white' : 'delete'} onClick={() => removeRoom(room._id)}>X</span>
                                 </li>
                             ))
                         }
+                        <li className={!state.isCreateForm ? "plus" : 'plus minus'} onClick={() => setState({ ...state, isCreateForm: !state.isCreateForm })}></li>
                     </ul>
                 </div>
+                {
+                    state.isCreateForm ? (
+                        <div className="create">
+                            <h4>Создание новой комнаты</h4>
+                            <form onSubmit={createRoom}>
+                                <input name="createRoomName" type="text" placeholder="Введите название комнаты" onChange={handleChange} />
+                                <button type="submit">Создать</button>
+                            </form>
+                        </div>
+                    ) : null
+                }
+
             </div>
         </div>
     )
