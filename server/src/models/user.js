@@ -4,6 +4,13 @@ const { isEmail } = require("validator");
 
 const { Schema } = mongoose;
 
+const personalInfo = new Schema({
+	name: String,
+	surname: String,
+	age: Number,
+	city: String,
+});
+
 const userSchema = new Schema({
 	email: {
 		type: String,
@@ -17,6 +24,24 @@ const userSchema = new Schema({
 		type: String,
 		required: [true, "Пожалуйста введите пароль"],
 		minlength: [4, "Минимальная длинна пароля 4 символа"],
+	},
+	personalInfo: {
+		name: {
+			type: String,
+			default: "",
+		},
+		surname: {
+			type: String,
+			default: "",
+		},
+		age: {
+			type: Number,
+			default: null,
+		},
+		city: {
+			type: String,
+			default: "",
+		},
 	},
 	refreshToken: {
 		type: String,

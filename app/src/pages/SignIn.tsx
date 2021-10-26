@@ -5,7 +5,6 @@ import { AxiosResponse } from 'axios'
 
 import api from "@/utils/api"
 import { AuthContext } from '@/contexts/auth';
-import useAuth from "@/hooks/useAuth";
 
 import style from '@styles/pages/SignIn.module.scss'
 
@@ -23,7 +22,7 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
     const [state, setState] = useState<State>({
         email: '',
         password: '',
-        isRegister: props.match.path === '/register'
+        isRegister: props.match.path === '/registration'
     });
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
@@ -59,7 +58,7 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
                         <div className="container container_buttons">
                             <button type="submit">Enter</button>
                             {
-                                !state.isRegister ? (<NavLink to='/register'>Register</NavLink>) : (<NavLink to='/signin'>Signin</NavLink>)
+                                !state.isRegister ? (<NavLink to='/registration'>Register</NavLink>) : (<NavLink to='/signin'>Signin</NavLink>)
                             }
 
                         </div>
