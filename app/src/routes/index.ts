@@ -8,7 +8,6 @@ import LoginLayout from '@/layouts/LoginLayout'
 import LogoutLayout from '@/layouts/LogoutLayout'
 import { RouteComponentProps, Router } from 'react-router';
 
-
 const routes: {
     path?: string,
     title?: string
