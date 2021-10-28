@@ -14,7 +14,7 @@ const useAuth = () => {
                 password
             });
         } catch (error) {
-            console.error(error);
+            throw error
         }
     }
 
@@ -27,7 +27,7 @@ const useAuth = () => {
             setUser(data);
             localStorage.setItem('user_info', JSON.stringify(data));
         } catch (error) {
-            console.error(error);
+            throw error
         }
     }
 

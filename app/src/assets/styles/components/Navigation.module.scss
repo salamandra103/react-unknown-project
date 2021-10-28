@@ -4,26 +4,28 @@
     width: 100%;
     justify-content: space-between;
     background-color: #9839e0;
+    position: relative;
+    z-index: 5;
 
     :global {
         .menu {
             padding: 0 0;
-    
+
             ul {
                 display: flex;
                 margin: 0px;
-    
+
                 li {
                     transition: .2s;
-    
+
                     &:hover {
                         background-color: #ff7900;
-    
+
                         a {
                             transform: translateY(-2px);
                         }
                     }
-    
+
                     a {
                         display: block;
                         font-size: 16px;
@@ -39,8 +41,8 @@
         .tools {
             position: relative;
             background-color: #9839e0;
-            
-            
+
+
 
             &-menu {
                 height: 100%;
@@ -52,20 +54,23 @@
 
                     .tools-menu__icon {
                         background-color: #ff7900;
+
                         span {
                             width: 30px;
                         }
-    
-                        &:before, &:after {
+
+                        &:before,
+                        &:after {
                             transform: translate(-50%, -60%);
                             width: 30px;
                         }
-                        
+
                         &:before {
                             top: 30%;
                             left: 50%;
-                            
+
                         }
+
                         &:after {
                             top: 70%;
                             left: 50%;
@@ -79,20 +84,20 @@
                     position: absolute;
                     top: 100%;
                     right: 0;
-                    transition: 0.2s;       
+                    transition: 0.2s;
                     transform: scale(0);
 
                 }
 
                 &__list {
                     border-radius: 5px;
-                    box-shadow: 0 0 5px rgba(0,0,0,.25);
+                    box-shadow: 0 0 5px rgba(0, 0, 0, .25);
                     overflow: hidden;
                     min-width: 150px;
                 }
 
                 &__item {
-               
+
                     &.exit {
                         background-image: url('../../images/icons/exit.png');
                         background-position: 50% 50%;
@@ -101,7 +106,8 @@
                         background-color: transparent;
                     }
 
-                    a, button {
+                    a,
+                    button {
                         padding: 10px 20px;
                         width: 100%;
                         display: block;
@@ -124,6 +130,7 @@
                         &:active {
                             background-color: #b85600;
                             transition: .1s background-color;
+
                             span {
                                 top: 3px;
                             }
@@ -141,7 +148,7 @@
                     overflow: hidden;
                     cursor: pointer;
                     transition: .2s;
-    
+
                     span {
                         width: 5px;
                         height: 5px;
@@ -149,10 +156,10 @@
                         display: block;
                         border-radius: 999px;
                         transition: .2s;
-                        
-                       
+
+
                     }
-    
+
                     &:before,
                     &:after {
                         display: block;
@@ -166,11 +173,11 @@
                         transform: translate(0%, -60%);
                         transition: .2s;
                     }
-    
+
                     &:before {
                         left: 15px;
                     }
-    
+
                     &:after {
                         left: 40px;
                     }

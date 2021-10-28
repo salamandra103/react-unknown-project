@@ -31,8 +31,12 @@ const SignIn = (props: RouteComponentProps): JSX.Element => {
             auth.signup(state.email, state.password);
             history.push('/signin');
         } else {
-            auth.signin(state.email, state.password);
-            history.push('/');
+            try {
+                await auth.signin(state.email, state.password);
+                history.push('/');
+            } catch (error) {
+                console.error(error);
+            }
         }
     }
 

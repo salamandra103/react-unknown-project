@@ -7,5 +7,6 @@ const userController = require("../controllers/user");
 
 router.get("/", verifyAccessToken, userController.getUserInfo);
 router.post("/", verifyAccessToken, userController.setUserInfo);
+router.post("/password", verifyAccessToken, userController.setPassword);
 
 module.exports = router;

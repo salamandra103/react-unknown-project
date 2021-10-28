@@ -3,17 +3,11 @@ import React, { useState } from 'react';
 import style from '@styles/components/Tabs.module.scss'
 
 interface Props {
-    children?: JSX.Element | JSX.Element[],
-    options: TabsOptions[],
+    children: JSX.Element | JSX.Element[],
     defaultActiveTabId: number
 }
 
-interface TabsOptions {
-    component: any,
-    tabTitle: string,
-}
-
-const Tabs = ({ options, defaultActiveTabId }: Props): JSX.Element => {
+const Tabs = ({ children, defaultActiveTabId }: Props): JSX.Element => {
 
     const [state, setState] = useState({
         activeTab: defaultActiveTabId || 0
@@ -31,26 +25,32 @@ const Tabs = ({ options, defaultActiveTabId }: Props): JSX.Element => {
                 <div className="wrapper">
                     <nav className="navigation">
                         <ul>
-                            {
-                                options.map((tab, tabIndex) => {
-                                    return (
-                                        <li key={tabIndex} className={tabIndex === state.activeTab ? 'active' : ''}>
-                                            <a href="#" onClick={() => changeTab(tabIndex)}>{tab.tabTitle}</a>
-                                        </li>
-                                    )
-                                })
-                            }
+                            {Array.isArray(children) ? children.map((tab, tabIndex) => {
+                                return (
+                                    <li key={tabIndex} className={tabIndex === state.activeTab ? 'active' : ''}>
+                                        <a href="#" onClick={() => changeTab(tabIndex)}>{tab.props['data-tab-title']}</a>
+                                    </li>
+                                )
+                            }) : (
+                                <li className='active'>
+                                    <a href="#">{children.props['data-tab-title']}</a>
+                                </li>
+                            )}
                         </ul>
                     </nav>
                     <div className="content">
                         {
-                            options.map((tab, tabIndex) => {
+                            Array.isArray(children) ? children.map((tab, tabIndex) => {
                                 return (
                                     <div className={state.activeTab === tabIndex ? 'tab active' : 'tab'} key={tabIndex}>
-                                        {React.createElement(tab.component)}
+                                        {tab}
                                     </div>
                                 )
-                            })
+                            }) : (
+                                <div className='tab active'>
+                                    {children}
+                                </div>
+                            )
                         }
                     </div>
                 </div>
