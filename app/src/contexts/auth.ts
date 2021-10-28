@@ -1,3 +1,3 @@
-import React from 'react';
+import React from "react";
 
-export const AuthContext = React.createContext<any>(false)
+export const AuthContext = React.createContext<any>(false);

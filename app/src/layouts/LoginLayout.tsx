@@ -1,16 +1,14 @@
-import React, { useContext } from 'react'
+import React, { useContext } from "react";
 
-import { AuthContext } from '@/contexts/auth';
+import { AuthContext } from "@/contexts/auth";
 
-import Navigation from '@/components/Navigation'
+import Navigation from "@/components/Navigation";
 
-const LoginLayout = ({ children }: { children?: JSX.Element }) => {
-    return (
-        <>
-            <Navigation />
-            {children}
-        </>
-    )
-}
+const LoginLayout = ({ children }: { children?: JSX.Element }) => (
+	<>
+		<Navigation />
+		{children}
+	</>
+);
 
-export default LoginLayout
+export default LoginLayout;

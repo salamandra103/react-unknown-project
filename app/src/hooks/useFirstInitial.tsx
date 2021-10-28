@@ -1,12 +1,11 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect } from "react";
 
 const useFirstInitial = () => {
+	const isFirstInitial = useRef<boolean>(true);
 
-    const isFirstInitial = useRef<boolean>(true);
+	useEffect(() => {
+		isFirstInitial.current = false;
+	}, []);
 
-    useEffect(() => {
-        isFirstInitial.current = false;
-    }, []);
-
-    return isFirstInitial.current;
-}
+	return isFirstInitial.current;
+};

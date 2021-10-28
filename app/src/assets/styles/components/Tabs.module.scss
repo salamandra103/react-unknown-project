@@ -20,14 +20,15 @@
                 li {
                     text-align: center;
                     &.active {
-                        a {
+                        a, button {
                             background-color: #ff7900;
                             color: #fff;
                             cursor: default;
                             pointer-events: none;
                         }
                     }
-                    a {
+                    a, button {
+                        width: 100%;
                         display: block;
                         padding: 10px;
                         font-size: 16px;

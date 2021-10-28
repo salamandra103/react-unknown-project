@@ -1,15 +1,16 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
 
 module.exports = {
 	entry: "./src/index.ts",
-	devtool: 'inline-source-map',
+	devtool: "inline-source-map",
 	output: {
 		path: path.join(__dirname, "dist"),
 		publicPath: "/",
-		filename: '[name].bundle.js',
-	    chunkFilename: '[name].bundle.js',
+		filename: "[name].bundle.js",
+		chunkFilename: "[name].bundle.js",
 	},
 	resolve: {
 		extensions: [".tsx", ".ts", ".js", ".jsx"],
@@ -45,7 +46,7 @@ module.exports = {
 						loader: "css-loader",
 						options: {
 							sourceMap: true,
-							modules: true
+							modules: true,
 						},
 					},
 					{

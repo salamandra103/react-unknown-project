@@ -1,9 +1,13 @@
-import React, { Children, useEffect, createContext, useContext, useMemo, useState } from "react";
-import { BrowserRouter, Redirect, Route, RouteComponentProps, RouteProps, Switch } from "react-router-dom";
+import React, {
+	Children, useEffect, createContext, useContext, useMemo, useState,
+} from "react";
+import {
+	BrowserRouter, Redirect, Route, RouteComponentProps, RouteProps, Switch,
+} from "react-router-dom";
 import { Provider } from "react-redux";
 
-import LoginLayout from '@/layouts/LoginLayout'
-import LogoutLayout from '@/layouts/LogoutLayout'
+import LoginLayout from "@/layouts/LoginLayout";
+import LogoutLayout from "@/layouts/LogoutLayout";
 
 import store from "@/store";
 import routes from "@/routes";
@@ -11,31 +15,30 @@ import routes from "@/routes";
 import { AuthContext } from "@/contexts/auth";
 import useAuth from "@/hooks/useAuth";
 
-import Main from '@/pages/Main'
-import SignIn from '@/pages/SignIn'
-import Error404 from '@/pages/Error404'
+import Main from "@/pages/Main";
+import SignIn from "@/pages/SignIn";
+import Error404 from "@/pages/Error404";
 
-
-function App() {
+function App():JSX.Element {
 	const _auth = useAuth();
 
-	const routeComponents = routes.map(({ path, component, requiredAuth, layout, ...rest }, key) => {
+	const routeComponents = routes.map(({
+		path, component, requiredAuth, layout, ...rest
+	}, key) => {
 		if (layout) {
 			return (
 				<Route exact {...rest} path={path} key={key} render={(props) => {
-					if ((path === '/registration' || path === '/signin') && _auth.user) {
-						return <Redirect to="/" />
-					} else {
-						if (requiredAuth) {
-							return _auth.user ? React.createElement(layout, props, React.createElement(component, props)) : <Redirect to="/signin" />
-						} else {
-							return React.createElement(layout, props, React.createElement(component, props))
-						}
+					if ((path === "/registration" || path === "/signin") && _auth.user) {
+						return <Redirect to="/" />;
 					}
+					if (requiredAuth) {
+						return _auth.user ? React.createElement(layout, props, React.createElement(component, props)) : <Redirect to="/signin" />;
+					}
+					return React.createElement(layout, props, React.createElement(component, props));
 				}} />
-			)
+			);
 		}
-		return (<Route path={path} render={props => React.createElement(component, props)} key={key} />)
+		return (<Route path={path} render={(props) => React.createElement(component, props)} key={key} />);
 	});
 
 	return (
@@ -47,7 +50,7 @@ function App() {
 					</Switch>
 				</AuthContext.Provider>
 			</BrowserRouter>
-		</Provider >
+		</Provider>
 	);
 }
 
